@@ -1,4 +1,4 @@
-# NEON HORDE — Horde Shooter / Survivor-like
+# NeonHorde — Horde Shooter / Survivor-like
 
 Webgame verticale (portrait 9:16, adattabile a desktop) in stile
 "Survivor.io": movimento libero, tiro automatico sul nemico più vicino,
