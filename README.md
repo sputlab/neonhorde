@@ -1,4 +1,4 @@
-# NEON HORDE
+# NeonHorde
 
 Vertical (9:16) horde-shooter / survivor-like web game.
 Stack: HTML5 Canvas + vanilla JS (ES modules) + PHP 8 + MySQL 8. Installable PWA.
