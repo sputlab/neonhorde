@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="it" class="landing-html">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON HORDE — Horde Shooter Neon nel Browser</title>
+<meta name="description" content="NEON HORDE: sopravvivi a ondate infinite di nemici, affronta 20 boss, evolvi il tuo arsenale. Gratis, senza pubblicità, gioca subito nel browser.">
+
+<!-- Open Graph / condivisione social -->
+<meta property="og:title" content="NEON HORDE — Horde Shooter Neon nel Browser">
+<meta property="og:description" content="Sopravvivi a ondate infinite di nemici, affronta 20 boss, evolvi il tuo arsenale. Gratis, senza pubblicità.">
+<meta property="og:image" content="assets/hero.jpg">
+<meta property="og:type" content="website">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/landing.css">
+</head>
+<body class="landing-body">
+
+<!-- ============================= HERO FULLSCREEN ============================= -->
+<header class="hero">
+  <div class="hero-overlay"></div>
+  <nav class="hero-nav">
+    <span class="hero-nav-logo">NEON<span>HORDE</span></span>
+    <div class="hero-nav-links">
+      <button class="link-btn" id="nav-manual" data-i18n="nav.manual">Manuale</button>
+      <button class="lang-switch" id="lang-switch" aria-label="Cambia lingua / Change language">EN</button>
+    </div>
+  </nav>
+
+  <div class="hero-content">
+    <h1 class="hero-title">NEON<span>HORDE</span></h1>
+    <p class="hero-tagline" data-i18n="hero.tagline">Sopravvivi. Spara. Evolvi.</p>
+    <p class="hero-subtitle" data-i18n="hero.subtitle">
+      Un horde shooter verticale gratuito, direttamente nel browser.
+      Nessuna pubblicità, nessun acquisto che dia vantaggi in-game.
+    </p>
+    <div class="hero-cta-row">
+      <a class="btn btn-primary btn-hero" href="game.html" data-i18n="hero.play">GIOCA ORA</a>
+      <button class="btn btn-hero-secondary" id="hero-leaderboard-btn" data-i18n="hero.leaderboard">CLASSIFICA</button>
+    </div>
+  </div>
+
+  <button class="scroll-indicator" id="scroll-indicator" data-i18n-aria="hero.scroll_hint" aria-label="Scorri per saperne di più">
+    <span class="scroll-indicator-mouse"><span class="scroll-indicator-dot"></span></span>
+    <span class="scroll-indicator-chevron"></span>
+  </button>
+</header>
+
+<!-- ============================= DESCRIZIONE ============================= -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <h2 class="section-title" data-i18n="about.title">Un'orda non ti dà tregua</h2>
+    <p class="section-lead" data-i18n="about.lead">
+      Il tuo personaggio spara automaticamente verso il nemico più vicino:
+      il tuo compito è muoverti, sopravvivere e scegliere con cura ogni
+      potenziamento. Ogni ondata è più densa, più veloce, più letale —
+      e coi minuti la posta si alza da entrambe le parti: anche i nemici
+      diventano progressivamente più forti, non solo tu.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🔺</span>
+        <h3 class="feature-title" data-i18n="feature.wave.title">Ondate infinite</h3>
+        <p class="feature-desc" data-i18n="feature.wave.desc">Nemici che puntano dritti verso di te, sempre più numerosi e aggressivi col passare del tempo.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⬡</span>
+        <h3 class="feature-title" data-i18n="feature.bosses.title">20 boss</h3>
+        <p class="feature-desc" data-i18n="feature.bosses.desc">Anelli poligonali rotanti con satelliti orbitanti, pattern d'attacco unici, e un boss finale che cambia colore e attacca a 360°.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3 class="feature-title" data-i18n="feature.upgrades.title">Potenziamenti progressivi</h3>
+        <p class="feature-desc" data-i18n="feature.upgrades.desc">5 armi, 5 modalità di tiro e 9 passivi, tutti livellabili in-game. Nessuna scelta è mai definitiva o sprecata.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💣</span>
+        <h3 class="feature-title" data-i18n="feature.bomb.title">Bomba EMP</h3>
+        <p class="feature-desc" data-i18n="feature.bomb.desc">Un jolly da usare a piacimento per ripulire lo schermo quando la situazione degenera — inefficace sui boss, per tenerti sulla corda.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎮</span>
+        <h3 class="feature-title" data-i18n="feature.controls.title">Controlli su misura</h3>
+        <p class="feature-desc" data-i18n="feature.controls.desc">Touch, D-pad, inclinazione del dispositivo su mobile; tastiera o mouse su desktop. Tutto configurabile.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🌐</span>
+        <h3 class="feature-title" data-i18n="feature.langs.title">7 lingue, installabile</h3>
+        <p class="feature-desc" data-i18n="feature.langs.desc">Interfaccia completa in italiano, inglese, spagnolo, francese, tedesco, sloveno e russo. Installabile come app su Android e iOS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= STAT BAR ============================= -->
+<section class="stat-bar">
+  <div class="stat-item"><span class="stat-value">20</span><span class="stat-label" data-i18n="stats.boss">Boss</span></div>
+  <div class="stat-item"><span class="stat-value">5</span><span class="stat-label" data-i18n="stats.weapons">Armi</span></div>
+  <div class="stat-item"><span class="stat-value">14</span><span class="stat-label" data-i18n="stats.upgrades">Potenziamenti</span></div>
+  <div class="stat-item"><span class="stat-value">7</span><span class="stat-label" data-i18n="stats.langs">Lingue</span></div>
+  <div class="stat-item"><span class="stat-value">0€</span><span class="stat-label" data-i18n="stats.cost">Costo</span></div>
+</section>
+
+<!-- ============================= SUPPORTO / DONAZIONI ============================= -->
+<section class="section support-section" id="support">
+  <div class="section-inner support-inner">
+    <span class="support-badge" data-i18n="support.badge">◆ Supporta il progetto</span>
+    <h2 class="section-title" data-i18n="support.title">NEON HORDE resta gratis grazie a te</h2>
+    <p class="section-lead" data-i18n="support.lead">
+      Nessuna pubblicità. Nessun acquisto che dia vantaggi in-game.
+      Nessun abbonamento. NEON HORDE è sviluppato da un solo sviluppatore
+      indipendente nel tempo libero, e lo resterà — ma hosting, dominio e
+      ore di sviluppo hanno un costo reale. Se ti sei divertito, una
+      donazione libera è l'unico modo con cui il progetto si sostiene.
+    </p>
+
+    <div class="support-reasons">
+      <div class="support-reason">
+        <span class="support-reason-icon">🖥️</span>
+        <p data-i18n="support.reason1">Copre i costi di hosting e dominio, sempre online</p>
+      </div>
+      <div class="support-reason">
+        <span class="support-reason-icon">🛠️</span>
+        <p data-i18n="support.reason2">Finanzia nuovi boss, armi e funzionalità future</p>
+      </div>
+      <div class="support-reason">
+        <span class="support-reason-icon">🙌</span>
+        <p data-i18n="support.reason3">Nessuna pressione: anche solo giocare e passaparola è già un aiuto enorme</p>
+      </div>
+    </div>
+
+    <a class="btn btn-donate" href="https://www.sputlab.com/donate" target="_blank" rel="noopener" data-i18n="support.cta">
+      ◆ SOSTIENI IL PROGETTO
+    </a>
+    <p class="support-footnote" data-i18n="support.footnote">Ogni cifra è benvenuta. Grazie di cuore a chi lo farà. 💚</p>
+  </div>
+</section>
+
+<!-- ============================= CONTATTI / FOOTER ============================= -->
+<footer class="landing-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">NEON<span>HORDE</span></span>
+      <p class="footer-tagline" data-i18n="footer.tagline">Un progetto Sputlab.</p>
+    </div>
+    <div class="footer-links">
+      <a class="link-btn" href="game.html" data-i18n="footer.play">Gioca</a>
+      <button class="link-btn" id="footer-manual" data-i18n="nav.manual">Manuale</button>
+      <button class="link-btn" id="footer-changelog" data-i18n="nav.changelog">Changelog</button>
+      <button class="link-btn" id="footer-leaderboard" data-i18n="nav.leaderboard">Classifica</button>
+      <a class="link-btn" href="mailto:sputnik@sputlab.com" data-i18n="footer.contact">Contattami</a>
+      <a class="link-btn" href="https://www.sputlab.com/donate" target="_blank" rel="noopener" data-i18n="footer.donate">Dona</a>
+      <a class="link-btn" href="game.html" data-i18n="footer.privacy">Privacy Policy</a>
+    </div>
+    <p class="footer-copyright">© 2026 Sputlab — sputnik@sputlab.com</p>
+  </div>
+</footer>
+
+<!-- ============================= MODALE CLASSIFICA ============================= -->
+<div id="leaderboard-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="leaderboard.title">Classifica Globale</h2>
+    <div class="tabs-secondary" id="landing-leaderboard-diff-tabs">
+      <button class="tab-small" data-diff-tab="easy" data-i18n="difficulty.easy">FACILE</button>
+      <button class="tab-small active" data-diff-tab="normal" data-i18n="difficulty.normal">NORMALE</button>
+      <button class="tab-small" data-diff-tab="hard" data-i18n="difficulty.hard">DIFFICILE</button>
+      <button class="tab-small" data-diff-tab="inferno" data-i18n="difficulty.inferno">INFERNO</button>
+    </div>
+    <div class="modal-scroll">
+      <div id="landing-leaderboard-list" class="leaderboard-list">
+        <div class="lb-row"><span class="lb-name" data-i18n="leaderboard.loading">Caricamento…</span></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="leaderboard-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- ============================= MODALE CHANGELOG ============================= -->
+<div id="landing-changelog-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="nav.changelog">Changelog</h2>
+    <div class="modal-scroll">
+
+      <div id="changelog-body-it" class="changelog-lang">
+        <div class="changelog-entry">
+          <h3>v1.37.1</h3>
+          <ul><li>Corretta una falla residua nella protezione del nickname per gli ospiti.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.37.0</h3>
+          <ul><li>Corretto alla radice il bug del nickname tra ospiti e registrati; nuovo modale informativo; cambio nickname ed eliminazione account.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.36.0</h3>
+          <ul><li>Corretto un bug del database sulle missioni; registrazione a fine partita in un modale; nuovo manuale nella landing page.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.35.0</h3>
+          <ul><li>Corretta la registrazione per gli ospiti con nickname già scelto; missioni/traguardi visibili anche da ospite; nuovo flusso di fine partita.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.34.0</h3>
+          <ul>
+            <li>Corretto un bug importante: le run lunghe con boss di alto livello venivano rifiutate in blocco, senza punteggio né gemme.</li>
+            <li>Corretto lo sfasamento delle gemme tra negozio e schermata principale dopo il riscatto di missioni/traguardi.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.33.0</h3>
+          <ul><li>Nuovi "Traguardi" a progressione permanente, con 6 skin esclusive.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.32.0</h3>
+          <ul><li>Corretto bug Impulso Magnetico, potenziamenti magnetici unificati, percentuali corrette, descrizioni dinamiche.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.31.0</h3>
+          <ul><li>Corretto bug audio iOS, musica dal menu, "vero duello" boss, nuove missioni archiviate.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.30.0</h3>
+          <ul><li>Corretta la barra boss residua. Nuova modalità infinita dopo il ventesimo boss.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.29.0</h3>
+          <ul><li>Corretto un bug importante negli attacchi a distanza dei boss (non scattavano quasi mai a 60Hz). Difficoltà calibrata per tier.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.28.0</h3>
+          <ul><li>Ondate "blindate" durante i boss, corretto il timer del prossimo boss.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.27.0</h3>
+          <ul><li>Skin per le armi, offerta del giorno, loadout di partenza, bundle scontati.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.26.0</h3>
+          <ul><li>4 nuove skin: Nucleo Pulsante, Sentinella, Sovraccarico, Spettro.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.25.0</h3>
+          <ul><li>4 nuove armi: Boomerang, Fulmine a Catena, Railgun, Drone Orbitale.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.24.0</h3>
+          <ul><li>4 nuovi nemici: Divisore, Corazzato, Teletrasportatore, Evocatore.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.23.0</h3>
+          <ul><li>4 nuovi potenziamenti passivi (Spine Ritorsive, Secondo Fiato, Impulso Magnetico, Campo Rallentante).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.22.0</h3>
+          <ul><li>Ridotta la durata dei proiettili homing, troppo efficaci a lungo senza sforzo.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.21.0</h3>
+          <ul><li>Corretto un bug importante: gli acquisti del negozio ora hanno davvero effetto in partita. Card punteggio più grande e leggibile.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.20.0</h3>
+          <ul>
+            <li>Rimossi i nickname automatici tipo "Player1234"; nuovo indicatore utenti online in schermata titolo.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.19.0</h3>
+          <ul><li>Schermata fine partita ristrutturata: nessuno scroll in orizzontale, punteggio più evidente, layout più compatto.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.1</h3>
+          <ul><li>Riepilogo fine partita su una riga anche su desktop. Nuovo titolo "Sistema compromesso".</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.0</h3>
+          <ul>
+            <li>Corretto testo illeggibile nelle card potenziamento. Nuovo streak giornaliero, card punteggio condivisibile, feedback rapido post-partita.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.17.0</h3>
+          <ul>
+            <li>Nuova difficoltà "Facile". Classifica arricchita e separata per difficoltà. Menu riorganizzati per l'orizzontale.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.1</h3>
+          <ul><li>Colonna sonora: da vaporwave/ambient a dark/hard techno e drum'n'bass.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.0</h3>
+          <ul>
+            <li>Corretto il modale di calibrazione sensori in orizzontale.</li>
+            <li>Nuova colonna sonora procedurale: 40 loop tra ambient e boss.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.15.0</h3>
+          <ul>
+            <li>Corretto un bug sui controlli a inclinazione tra verticale e orizzontale.</li>
+            <li>Nuovo prompt per scegliere un nickname prima di iniziare la partita.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.2</h3>
+          <ul><li>Privacy Policy (nel gioco) corretta: Umami è un servizio cloud di terze parti.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.1</h3>
+          <ul><li>Privacy Policy (nel gioco) aggiornata per l'introduzione di Umami Analytics.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.0</h3>
+          <ul>
+            <li>Questa landing page è ora completamente bilingue IT/EN, changelog e classifica inclusi.</li>
+            <li>Corretto un bug per cui questa pagina non scrollava su desktop.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.13.0</h3>
+          <ul><li>Riorganizzati i file: il gioco è ora "game.html", questa landing page è "index.html".</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.11.0</h3>
+          <ul>
+            <li>Corretto un bug importante sui proiettili homing: ora restano agganciati a un solo bersaglio invece di ondeggiare senza mai colpire nulla.</li>
+            <li>Tutti i proiettili hanno una durata massima di vita (3.5s) e svaniscono invece di vagare all'infinito.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.x</h3>
+          <ul>
+            <li>Prompt di rotazione su mobile, mostrato solo subito prima di avviare una partita.</li>
+            <li>Nuovo D-pad virtuale a trascinamento, configurabile per lato e dimensione.</li>
+            <li>Calibrazione dei sensori di movimento con livella virtuale.</li>
+            <li>Nickname univoci (non case-sensitive).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.9.0</h3>
+          <ul><li>Il gioco è ora una PWA installabile su Android e iOS.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.8.0</h3>
+          <ul>
+            <li>Bomba EMP: nuovo potenziamento accumulabile che azzera i nemici a schermo (non i boss).</li>
+            <li>Privacy Policy conforme al GDPR.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.5.0 – v1.7.0</h3>
+          <ul>
+            <li>Sistema di potenziamenti reso davvero progressivo, con livelli e due nuovi passivi (Colpo Critico, Vampirismo).</li>
+            <li>Roster boss esteso da 3 a 20, con nuovo aspetto ad anelli poligonali e satelliti orbitanti.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.0.0 – v1.4.0</h3>
+          <ul>
+            <li>Prima versione pubblica: gameplay completo, backend PHP/MySQL, anti-cheat.</li>
+            <li>Reset password, negozio, missioni giornaliere, menu Impostazioni, traduzione in 7 lingue, modalità Daltonici.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="changelog-body-en" class="changelog-lang hidden">
+        <div class="changelog-entry">
+          <h3>v1.37.1</h3>
+          <ul><li>Fixed a remaining gap in guest nickname protection.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.37.0</h3>
+          <ul><li>Fixed the guest/registered nickname conflict at its root; new info modal; change nickname and delete account.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.36.0</h3>
+          <ul><li>Fixed a database bug on missions; registration at game over now in a modal; new manual on the landing page.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.35.0</h3>
+          <ul><li>Fixed registration for guests with an existing nickname; missions/milestones visible as guest; new game-over flow.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.34.0</h3>
+          <ul>
+            <li>Fixed a major bug: long runs with high-tier boss kills were rejected outright, with no score or gems awarded.</li>
+            <li>Fixed a gem-count mismatch between the shop and the main screen after claiming missions/milestones.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.33.0</h3>
+          <ul><li>New permanent-progression "Milestones", with 6 exclusive skins.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.32.0</h3>
+          <ul><li>Fixed Magnet Pulse bug, unified magnet passives, corrected percentages, dynamic descriptions.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.31.0</h3>
+          <ul><li>Fixed iOS audio bug, menu music, "true boss duel", archived missions.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.30.0</h3>
+          <ul><li>Fixed lingering boss bar. New endless mode past the 20th boss.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.29.0</h3>
+          <ul><li>Fixed a major bug in boss ranged attacks (almost never fired at 60Hz). Attack difficulty now tuned per tier.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.28.0</h3>
+          <ul><li>"Sealed" waves during boss fights, fixed next-boss timer.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.27.0</h3>
+          <ul><li>Weapon skins, daily deal, starting loadout, discounted bundles.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.26.0</h3>
+          <ul><li>4 new skins: Pulse Core, Sentinel, Overcharge, Spectre.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.25.0</h3>
+          <ul><li>4 new weapons: Boomerang, Chain Lightning, Railgun, Orbital Drone.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.24.0</h3>
+          <ul><li>4 new enemies: Splitter, Shielded, Teleporter, Summoner.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.23.0</h3>
+          <ul><li>4 new passive upgrades (Retaliation Spikes, Second Wind, Magnet Pulse, Slowing Field).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.22.0</h3>
+          <ul><li>Reduced homing projectile lifetime, too effective for too long without effort.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.21.0</h3>
+          <ul><li>Fixed a major bug: shop purchases now actually affect gameplay. Bigger, more readable score card.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.20.0</h3>
+          <ul>
+            <li>Removed automatic "Player1234"-style nicknames; new online player count on the title screen.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.19.0</h3>
+          <ul><li>Game-over screen restructured: no landscape scrolling, score more prominent, more compact layout.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.1</h3>
+          <ul><li>Game-over recap on one row on desktop too. New title "System compromised".</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.0</h3>
+          <ul>
+            <li>Fixed unreadable text in upgrade cards. New daily streak, shareable score card, quick post-run feedback.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.17.0</h3>
+          <ul>
+            <li>New "Easy" difficulty. Leaderboard enriched and split by difficulty. Menus reorganized for landscape.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.1</h3>
+          <ul><li>Soundtrack: from vaporwave/ambient to dark/hard techno and drum'n'bass.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.0</h3>
+          <ul>
+            <li>Fixed the sensor calibration modal in landscape.</li>
+            <li>New procedural soundtrack: 40 loops across ambient and boss tracks.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.15.0</h3>
+          <ul>
+            <li>Fixed a bug with tilt controls between portrait and landscape.</li>
+            <li>New prompt to choose a nickname before starting a match.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.2</h3>
+          <ul><li>Privacy Policy (in the game) corrected: Umami is a third-party cloud service.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.1</h3>
+          <ul><li>Privacy Policy (in the game) updated for the introduction of Umami Analytics.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.0</h3>
+          <ul>
+            <li>This landing page is now fully bilingual IT/EN, changelog and leaderboard included.</li>
+            <li>Fixed a bug where this page didn't scroll on desktop.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.13.0</h3>
+          <ul><li>Reorganized the files: the game is now "game.html", this landing page is "index.html".</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.11.0</h3>
+          <ul>
+            <li>Fixed a major bug with homing projectiles: they now lock onto a single target instead of wobbling around without ever hitting anything.</li>
+            <li>All projectiles now have a maximum lifetime (3.5s) and fade out instead of wandering indefinitely.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.x</h3>
+          <ul>
+            <li>Rotation prompt on mobile, shown only right before starting a match.</li>
+            <li>New drag-based virtual D-pad, configurable side and size.</li>
+            <li>Motion sensor calibration with a virtual level.</li>
+            <li>Unique nicknames (case-insensitive).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.9.0</h3>
+          <ul><li>The game is now a PWA installable on Android and iOS.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.8.0</h3>
+          <ul>
+            <li>EMP Bomb: new stackable upgrade that wipes out on-screen enemies (not bosses).</li>
+            <li>GDPR-compliant Privacy Policy.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.5.0 – v1.7.0</h3>
+          <ul>
+            <li>Upgrade system made truly progressive, with levels and two new passives (Critical Hit, Lifesteal).</li>
+            <li>Boss roster expanded from 3 to 20, with a new look featuring polygon rings and orbiting satellites.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.0.0 – v1.4.0</h3>
+          <ul>
+            <li>First public release: full gameplay, PHP/MySQL backend, anti-cheat.</li>
+            <li>Password reset, shop, daily missions, Settings menu, translation into 7 languages, Colorblind Mode.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+    <button class="btn btn-primary" id="landing-changelog-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- ============================= MODALE: MANUALE ============================= -->
+<div id="landing-manual-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-box-wide">
+    <h2 class="screen-title" data-i18n="nav.manual">Manuale</h2>
+    <div class="modal-scroll">
+
+      <div id="manual-body-it" class="changelog-lang">
+        <nav class="manual-toc">
+          <a href="#man-basics">Come si gioca</a>
+          <a href="#man-upgrades">Livelli</a>
+          <a href="#man-weapons">Armi</a>
+          <a href="#man-firemodes">Modalità di tiro</a>
+          <a href="#man-passives">Passivi</a>
+          <a href="#man-enemies">Nemici</a>
+          <a href="#man-bosses">Boss</a>
+          <a href="#man-bomb">Bomba EMP</a>
+          <a href="#man-difficulty">Difficoltà</a>
+          <a href="#man-shop">Negozio</a>
+          <a href="#man-missions">Missioni</a>
+          <a href="#man-achievements">Traguardi</a>
+          <a href="#man-account">Account</a>
+          <a href="#man-leaderboard">Classifica</a>
+          <a href="#man-settings">Impostazioni</a>
+        </nav>
+
+        <div class="manual-section" id="man-basics">
+          <h3>Come si gioca</h3>
+          <p>Il personaggio spara automaticamente contro il nemico più vicino entro un certo raggio: non serve mirare, il tuo compito è muoverti e scegliere i potenziamenti giusti. Su desktop ci si muove con WASD o le frecce (o col mouse, a seconda dei controlli scelti nelle Impostazioni); su mobile con un D-pad virtuale trascinabile, il tocco diretto, o l'inclinazione del dispositivo.</p>
+          <p>Sopravvivi il più a lungo possibile: il tempo passa, le ondate si susseguono, i nemici diventano via via più numerosi e più forti. Raccogli le gemme di esperienza (verdi) rilasciate dai nemici sconfitti per salire di livello, e le monete (gialle) per guadagnare gemme spendibili nel negozio a fine partita.</p>
+        </div>
+
+        <div class="manual-section" id="man-upgrades">
+          <h3>Livelli e potenziamenti</h3>
+          <p>Ogni volta che sali di livello, il gioco ti offre 3 scelte tra armi, modalità di tiro e passivi: sceglierne una interrompe brevemente l'azione, poi si riprende subito. Ogni potenziamento può essere scelto più volte fino al suo livello massimo, diventando via via più efficace — nessuna scelta è mai sprecata. Le carte mostrano sempre il bonus totale attuale, quello che otterresti scegliendole di nuovo, e il massimo raggiungibile.</p>
+        </div>
+
+        <div class="manual-section" id="man-weapons">
+          <h3>Armi (9 totali)</h3>
+          <p>Solo un'arma alla volta è equipaggiata, e ogni nuova arma scelta sostituisce quella corrente. Pistola e Mitragliatrice sono sempre disponibili fin da subito; le altre 7 vanno prima sbloccate nel Negozio prima di poter comparire tra le scelte in game.</p>
+          <ul>
+            <li><strong>Pistola</strong> — colpo singolo affidabile, il punto di partenza.</li>
+            <li><strong>Mitragliatrice</strong> — cadenza altissima, danno per colpo più basso.</li>
+            <li><strong>Shotgun</strong> — 5 proiettili a ventaglio, letale a corto raggio.</li>
+            <li><strong>Laser</strong> — perfora più nemici in linea.</li>
+            <li><strong>Flamethrower</strong> — raffica ravvicinata a raggio limitato ma cadenza fortissima.</li>
+            <li><strong>Boomerang</strong> — esce e torna indietro, colpendo due volte lungo il tragitto.</li>
+            <li><strong>Fulmine a Catena</strong> — salta al nemico più vicino non ancora colpito dopo ogni impatto.</li>
+            <li><strong>Railgun</strong> — perforazione quasi totale, ma tiro lentissimo.</li>
+            <li><strong>Drone Orbitale</strong> — non spara: un satellite orbita di continuo attorno a te, colpendo chi vi passa vicino.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-firemodes">
+          <h3>Modalità di tiro (5 totali)</h3>
+          <p>Si sommano all'arma equipaggiata, non la sostituiscono.</p>
+          <ul>
+            <li><strong>Proiettili Multipli</strong> — un proiettile extra per sparo.</li>
+            <li><strong>Perforazione</strong> — il colpo attraversa un nemico extra.</li>
+            <li><strong>Rimbalzo</strong> — il colpo rimbalza su un bersaglio extra.</li>
+            <li><strong>Aggancio</strong> — i proiettili virano leggermente verso il bersaglio più vicino.</li>
+            <li><strong>Esplosivo</strong> — impatto ad area.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-passives">
+          <h3>Passivi (12 totali)</h3>
+          <ul>
+            <li><strong>Potenza di fuoco</strong> — più danno.</li>
+            <li><strong>Cadenza di tiro</strong> — spari più spesso.</li>
+            <li><strong>Stivali agili</strong> — più velocità di movimento.</li>
+            <li><strong>Campo Magnetico</strong> — raggio di raccolta pickup crescente su 4 stage, fino ad attrarre tutto ciò che è visibile.</li>
+            <li><strong>Rigenerazione</strong> — cura nel tempo.</li>
+            <li><strong>Scudo temporaneo</strong> — blocca un colpo.</li>
+            <li><strong>Vitalità</strong> — più HP massimi.</li>
+            <li><strong>Colpo Critico</strong> — probabilità di infliggere danno doppio.</li>
+            <li><strong>Vampirismo</strong> — cura in base al danno inflitto, temporaneo (si rinnova risceglendolo).</li>
+            <li><strong>Spine Ritorsive</strong> — riflette parte del danno subito ai nemici vicini.</li>
+            <li><strong>Secondo Fiato</strong> — sopravvivi a un colpo letale una volta a partita.</li>
+            <li><strong>Campo Rallentante</strong> — rallenta i nemici vicini.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-enemies">
+          <h3>Nemici (9 tipi)</h3>
+          <p>Sbloccati progressivamente col passare del tempo in una run.</p>
+          <ul>
+            <li><strong>Base, Veloce, Tank, A Distanza, Sciame</strong> — i primi 5, presenti fin dai primi minuti.</li>
+            <li><strong>Divisore</strong> — alla morte si divide in due copie più deboli.</li>
+            <li><strong>Corazzato</strong> — scudo rotante che blocca la maggior parte dei colpi da un lato.</li>
+            <li><strong>Teletrasportatore</strong> — si sposta periodicamente vicino a te.</li>
+            <li><strong>Evocatore</strong> — mantiene le distanze e genera periodicamente rinforzi.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-bosses">
+          <h3>Boss</h3>
+          <p>Ogni pochi minuti arriva un boss: quando appare, i nemici regolari già presenti vengono spazzati via per un vero duello uno-contro-uno, e lo spawner smette di generarne di nuovi finché non lo sconfiggi. 20 boss in tutto, ciascuno con un proprio pattern d'attacco (carica, raffica di proiettili, evocazione di rinforzi), sempre più forti mano a mano che ne sconfiggi. Dopo il ventesimo, il roster ricomincia da capo con una crescita più dolce: puoi continuare a giocare all'infinito.</p>
+        </div>
+
+        <div class="manual-section" id="man-bomb">
+          <h3>Bomba EMP</h3>
+          <p>Un potenziamento accumulabile: una volta ottenuto, puoi attivarlo quando vuoi per eliminare tutti i nemici regolari visibili sullo schermo — inefficace sui boss, va usata con criterio nei momenti più critici.</p>
+        </div>
+
+        <div class="manual-section" id="man-difficulty">
+          <h3>Difficoltà</h3>
+          <p>4 livelli tra cui scegliere a inizio partita: Facile, Normale, Difficile, Inferno — influenzano la forza dei nemici, la velocità con cui aumentano nel tempo, e le gemme guadagnate a fine partita.</p>
+        </div>
+
+        <div class="manual-section" id="man-shop">
+          <h3>Negozio</h3>
+          <p>Spendi le gemme guadagnate a fine partita in miglioramenti permanenti.</p>
+          <ul>
+            <li>Statistiche base (vita, danno, velocità) — accumulabili su più livelli.</li>
+            <li>Sblocco delle armi oltre a Pistola e Mitragliatrice.</li>
+            <li>Skin per il personaggio, puramente estetiche.</li>
+            <li>Skin per le armi, che ricolorano i proiettili di un'arma specifica.</li>
+            <li>Bundle scontati che raggruppano più oggetti insieme.</li>
+            <li>Un'offerta del giorno, sempre su un oggetto diverso, scontata del 30% per 24 ore.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-missions">
+          <h3>Missioni giornaliere</h3>
+          <p>Obiettivi che si rinnovano ogni giorno (uccisioni, sopravvivenza, ondate raggiunte, boss sconfitti, run giocate), ciascuno con una ricompensa in gemme. Una volta riscattate, si spostano nell'apposito tab "Completate".</p>
+        </div>
+
+        <div class="manual-section" id="man-achievements">
+          <h3>Traguardi</h3>
+          <p>A differenza delle missioni giornaliere, i Traguardi non si resettano mai: seguono i tuoi progressi totali (uccisioni, run completate, miglior sopravvivenza, streak giornaliera, boss sconfitti, danno inflitto) su più livelli crescenti. Raggiungendo i livelli più alti in ciascuna categoria sblocchi anche una skin esclusiva, ottenibile solo così, mai in vendita nel negozio.</p>
+        </div>
+
+        <div class="manual-section" id="man-account">
+          <h3>Account e progressione</h3>
+          <p>Puoi giocare subito come ospite, ma un account (email e password) ti permette di comparire in classifica e mantenere i tuoi progressi al sicuro su qualunque dispositivo. Puoi registrarti in qualunque momento, anche a fine partita, senza perdere nickname, gemme o progressi già accumulati come ospite. Giocando almeno una partita al giorno mantieni viva una streak, con un piccolo bonus di gemme che cresce insieme ai giorni consecutivi.</p>
+        </div>
+
+        <div class="manual-section" id="man-leaderboard">
+          <h3>Classifica</h3>
+          <p>Una classifica globale separata per ciascun livello di difficoltà, in base al punteggio.</p>
+        </div>
+
+        <div class="manual-section" id="man-settings">
+          <h3>Impostazioni e controlli</h3>
+          <p>Personalizza schema di controllo, D-pad, sensori di movimento, skin equipaggiata, arma di partenza, modalità Daltonici, effetti visivi avanzati, e altro ancora — tutto accessibile dal menu Impostazioni in game.</p>
+        </div>
+      </div>
+
+      <div id="manual-body-en" class="changelog-lang hidden">
+        <nav class="manual-toc">
+          <a href="#man-basics-en">How to play</a>
+          <a href="#man-upgrades-en">Leveling up</a>
+          <a href="#man-weapons-en">Weapons</a>
+          <a href="#man-firemodes-en">Fire modes</a>
+          <a href="#man-passives-en">Passives</a>
+          <a href="#man-enemies-en">Enemies</a>
+          <a href="#man-bosses-en">Bosses</a>
+          <a href="#man-bomb-en">EMP Bomb</a>
+          <a href="#man-difficulty-en">Difficulty</a>
+          <a href="#man-shop-en">Shop</a>
+          <a href="#man-missions-en">Missions</a>
+          <a href="#man-achievements-en">Milestones</a>
+          <a href="#man-account-en">Account</a>
+          <a href="#man-leaderboard-en">Leaderboard</a>
+          <a href="#man-settings-en">Settings</a>
+        </nav>
+
+        <div class="manual-section" id="man-basics-en">
+          <h3>How to play</h3>
+          <p>Your character shoots automatically at the nearest enemy within range: no aiming needed, your job is to move and pick the right upgrades. On desktop, move with WASD or arrow keys (or the mouse, depending on your chosen control scheme in Settings); on mobile, use the draggable virtual D-pad, direct touch, or device tilt.</p>
+          <p>Survive as long as possible: time passes, waves keep coming, enemies grow more numerous and stronger. Collect experience gems (green) dropped by defeated enemies to level up, and coins (yellow) to earn gems you can spend in the shop after the run.</p>
+        </div>
+
+        <div class="manual-section" id="man-upgrades-en">
+          <h3>Leveling up</h3>
+          <p>Every time you level up, you're offered 3 choices among weapons, fire modes, and passives: picking one briefly pauses the action, then resumes right away. Every upgrade can be picked multiple times up to its max level, growing more effective each time — no pick is ever wasted. Cards always show the current total bonus, what you'd get by picking again, and the maximum reachable.</p>
+        </div>
+
+        <div class="manual-section" id="man-weapons-en">
+          <h3>Weapons (9 total)</h3>
+          <p>Only one weapon is equipped at a time, and picking a new one replaces the current one. Pistol and SMG are always available from the start; the other 7 must first be unlocked in the Shop before they can appear as in-run choices.</p>
+          <ul>
+            <li><strong>Pistol</strong> — reliable single shot, the starting point.</li>
+            <li><strong>SMG</strong> — very high fire rate, lower damage per hit.</li>
+            <li><strong>Shotgun</strong> — 5 spread pellets, deadly at close range.</li>
+            <li><strong>Laser</strong> — pierces through multiple enemies in a line.</li>
+            <li><strong>Flamethrower</strong> — close-range burst with limited range but very high fire rate.</li>
+            <li><strong>Boomerang</strong> — flies out and back, hitting twice along the way.</li>
+            <li><strong>Chain Lightning</strong> — jumps to the nearest not-yet-hit enemy after each impact.</li>
+            <li><strong>Railgun</strong> — near-total piercing, but very slow to fire.</li>
+            <li><strong>Orbital Drone</strong> — doesn't shoot: a satellite continuously orbits you, hitting whatever passes near it.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-firemodes-en">
+          <h3>Fire modes (5 total)</h3>
+          <p>These stack on top of your equipped weapon, they don't replace it.</p>
+          <ul>
+            <li><strong>Multishot</strong> — one extra projectile per shot.</li>
+            <li><strong>Pierce</strong> — the shot passes through one extra enemy.</li>
+            <li><strong>Bounce</strong> — the shot bounces to one extra target.</li>
+            <li><strong>Homing</strong> — projectiles steer slightly toward the nearest target.</li>
+            <li><strong>Explosive</strong> — area-of-effect impact.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-passives-en">
+          <h3>Passives (12 total)</h3>
+          <ul>
+            <li><strong>Firepower</strong> — more damage.</li>
+            <li><strong>Rate of Fire</strong> — shoot more often.</li>
+            <li><strong>Swift Boots</strong> — faster movement speed.</li>
+            <li><strong>Magnetic Field</strong> — growing pickup radius across 4 stages, up to attracting everything on screen.</li>
+            <li><strong>Regeneration</strong> — heal over time.</li>
+            <li><strong>Temporary Shield</strong> — blocks one hit.</li>
+            <li><strong>Vitality</strong> — more max HP.</li>
+            <li><strong>Critical Hit</strong> — chance to deal double damage.</li>
+            <li><strong>Lifesteal</strong> — heals based on damage dealt, temporary (refreshes if picked again).</li>
+            <li><strong>Retaliation Spikes</strong> — reflects part of the damage you take to nearby enemies.</li>
+            <li><strong>Second Wind</strong> — survive one lethal hit, once per run.</li>
+            <li><strong>Slowing Field</strong> — slows nearby enemies.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-enemies-en">
+          <h3>Enemies (9 types)</h3>
+          <p>Unlocked progressively as time passes in a run.</p>
+          <ul>
+            <li><strong>Basic, Fast, Tank, Ranged, Swarm</strong> — the first 5, present from the first few minutes.</li>
+            <li><strong>Splitter</strong> — splits into two weaker copies on death.</li>
+            <li><strong>Shielded</strong> — a rotating shield blocks most hits from one side.</li>
+            <li><strong>Teleporter</strong> — periodically blinks near you.</li>
+            <li><strong>Summoner</strong> — keeps its distance and periodically spawns reinforcements.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-bosses-en">
+          <h3>Bosses</h3>
+          <p>Every few minutes a boss arrives: when it appears, any regular enemies already present are swept away for a true one-on-one duel, and the spawner stops generating new ones until you defeat it. 20 bosses in total, each with its own attack pattern (charge, projectile barrage, summoning reinforcements), getting stronger as you defeat more of them. After the 20th, the roster starts over with gentler growth: you can keep playing indefinitely.</p>
+        </div>
+
+        <div class="manual-section" id="man-bomb-en">
+          <h3>EMP Bomb</h3>
+          <p>A stackable upgrade: once obtained, you can trigger it anytime to clear every regular enemy currently on screen — useless against bosses, so use it wisely at your most critical moments.</p>
+        </div>
+
+        <div class="manual-section" id="man-difficulty-en">
+          <h3>Difficulty</h3>
+          <p>4 levels to choose from at the start of a run: Easy, Normal, Hard, Inferno — affecting enemy strength, how fast it ramps up over time, and the gems earned at the end of the run.</p>
+        </div>
+
+        <div class="manual-section" id="man-shop-en">
+          <h3>Shop</h3>
+          <p>Spend the gems earned at the end of a run on permanent upgrades.</p>
+          <ul>
+            <li>Base stats (health, damage, speed) — stackable across multiple levels.</li>
+            <li>Unlocking weapons beyond Pistol and SMG.</li>
+            <li>Character skins, purely cosmetic.</li>
+            <li>Weapon skins, which recolor a specific weapon's projectiles.</li>
+            <li>Discounted bundles grouping several items together.</li>
+            <li>A daily deal, always on a different item, 30% off for 24 hours.</li>
+          </ul>
+        </div>
+
+        <div class="manual-section" id="man-missions-en">
+          <h3>Daily missions</h3>
+          <p>Goals that renew every day (kills, survival time, waves reached, bosses defeated, runs played), each with a gem reward. Once claimed, they move to the dedicated "Completed" tab.</p>
+        </div>
+
+        <div class="manual-section" id="man-achievements-en">
+          <h3>Milestones</h3>
+          <p>Unlike daily missions, Milestones never reset: they track your total progress (kills, runs completed, best survival time, daily streak, bosses defeated, damage dealt) across multiple increasing tiers. Reaching the highest tiers in each category also unlocks an exclusive skin, obtainable only this way, never for sale in the shop.</p>
+        </div>
+
+        <div class="manual-section" id="man-account-en">
+          <h3>Account &amp; progression</h3>
+          <p>You can start playing right away as a guest, but an account (email and password) lets you appear on the leaderboard and keeps your progress safe across any device. You can register at any time, even right after a run, without losing the nickname, gems, or progress you've already built up as a guest. Playing at least one run a day keeps a streak alive, with a small gem bonus that grows with consecutive days.</p>
+        </div>
+
+        <div class="manual-section" id="man-leaderboard-en">
+          <h3>Leaderboard</h3>
+          <p>A global leaderboard, separate for each difficulty level, ranked by score.</p>
+        </div>
+
+        <div class="manual-section" id="man-settings-en">
+          <h3>Settings &amp; controls</h3>
+          <p>Customize your control scheme, D-pad, motion sensors, equipped skin, starting weapon, colorblind mode, enhanced visual effects, and more — all accessible from the in-game Settings menu.</p>
+        </div>
+      </div>
+
+    </div>
+    <button class="btn btn-primary" id="landing-manual-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+
+<script src="js/landing.js"></script>
+</body>
+</html>

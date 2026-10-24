@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>NEON HORDE — Survivor Shooter</title>
+
+<!-- PWA: manifest + colore tema -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0d12">
+
+<!-- iOS: comportamento "app" a schermo intero quando aggiunta alla
+     schermata Home (Safari non legge il manifest per queste opzioni,
+     servono i meta tag proprietari Apple) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NEON HORDE">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- Favicon -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="game-body">
+
+
+<!-- ============================= PROMPT ROTAZIONE (mobile) ============================= -->
+<div id="rotate-prompt" class="gate-overlay hidden">
+  <div class="rotate-icon"><div class="rotate-phone"></div></div>
+  <p class="rotate-message" data-i18n="rotate.message">Ruota il dispositivo per un'esperienza migliore</p>
+  <button class="btn btn-primary" id="rotate-continue" data-i18n="rotate.continue_portrait">Continua in verticale</button>
+</div>
+
+<canvas id="game-canvas"></canvas>
+
+<!-- ============================= HUD (in-run) ============================= -->
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-stat hud-timer"><span id="hud-time">00:00</span></div>
+    <div class="hud-stat hud-wave"><span data-i18n="hud.wave">ONDATA</span> <span id="hud-wave">1</span></div>
+    <div class="hud-stat hud-kills"><span id="hud-kills">0</span> <span data-i18n="hud.kills_suffix">uccisi</span></div>
+  </div>
+
+  <div id="boss-bar" class="boss-bar hidden">
+    <div class="boss-name" id="boss-name">???</div>
+    <div class="boss-hp-track"><div class="boss-hp-fill" id="boss-hp-fill"></div></div>
+  </div>
+
+  <div class="hud-bottom">
+    <div class="hp-track"><div class="hp-fill" id="hp-fill"></div><span class="hp-label" id="hp-label">100/100</span></div>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
+  </div>
+
+  <button id="btn-pause" class="icon-btn hud-pause" aria-label="Pausa"><span class="pause-icon"></span></button>
+  <button id="btn-bomb" class="hud-bomb-btn" data-i18n-aria="hud.bomb_button" aria-label="Usa bomba" disabled>
+    💣<span class="bomb-count">0</span>
+  </button>
+</div>
+
+<!-- D-pad virtuale (schema di controllo "dpad"): zona di trascinamento
+     fissa in un angolo, il centro di riferimento è sempre il centro
+     del D-pad stesso, non il punto di primo tocco — così il dito resta
+     nell'angolo e non copre il centro dello schermo. -->
+<div id="dpad-zone" class="dpad-zone hidden dpad-side-left dpad-size-medium">
+  <div id="dpad-base" class="dpad-base">
+    <div id="dpad-stick" class="dpad-stick"></div>
+  </div>
+</div>
+
+<!-- ============================= SCHERMATA: TITOLO ============================= -->
+<section id="screen-title" class="screen">
+  <div class="title-wrap">
+    <h1 class="logo">NEON<span>HORDE</span></h1>
+    <p class="tagline" data-i18n="brand.tagline">Sopravvivi. Spara. Evolvi.</p>
+  </div>
+  <div class="menu-stack">
+    <button class="btn btn-primary" data-action="play" data-i18n="menu.play">GIOCA</button>
+    <button class="btn" data-action="open-shop" data-i18n="menu.shop">NEGOZIO</button>
+    <button class="btn" data-action="open-missions" data-i18n="menu.missions">MISSIONI</button>
+    <button class="btn" data-action="open-leaderboard" data-i18n="menu.leaderboard">CLASSIFICA</button>
+    <button class="btn" data-action="open-account" data-i18n="menu.account">ACCOUNT</button>
+    <button class="btn" data-action="open-settings" data-i18n="menu.settings">IMPOSTAZIONI</button>
+  </div>
+  <div id="account-status" class="account-status"></div>
+  <div class="title-badges-row">
+    <div class="gems-badge"><span id="title-gems">0</span> ◆</div>
+    <div class="streak-badge hidden" id="title-streak-badge">🔥 <span id="title-streak">0</span></div>
+  </div>
+  <div class="online-indicator" id="online-indicator">
+    <span class="online-dot"></span><span id="online-count">–</span> <span data-i18n="online.label">online</span>
+  </div>
+  <div class="version-row">
+    <div id="app-version" class="app-version">v1.0.0</div>
+    <button id="privacy-link" class="changelog-link" data-i18n="account.privacy_link">Privacy Policy</button>
+    <button id="changelog-link" class="changelog-link" data-i18n="common.changelog">Changelog</button>
+  </div>
+</section>
+
+<!-- ============================= SCHERMATA: DIFFICOLTÀ ============================= -->
+<section id="screen-difficulty" class="screen hidden">
+  <h2 class="screen-title" data-i18n="difficulty.title">SCEGLI LA DIFFICOLTÀ</h2>
+  <div class="diff-grid">
+    <button class="diff-card diff-easy" data-difficulty="easy">
+      <span class="diff-name" data-i18n="difficulty.easy">FACILE</span>
+      <span class="diff-mult" data-diff-mult="0.75">x0.75</span>
+    </button>
+    <button class="diff-card" data-difficulty="normal">
+      <span class="diff-name" data-i18n="difficulty.normal">NORMALE</span>
+      <span class="diff-mult" data-diff-mult="1.0">x1.0</span>
+    </button>
+    <button class="diff-card diff-hard" data-difficulty="hard">
+      <span class="diff-name" data-i18n="difficulty.hard">DIFFICILE</span>
+      <span class="diff-mult" data-diff-mult="1.5">x1.5</span>
+    </button>
+    <button class="diff-card diff-inferno" data-difficulty="inferno">
+      <span class="diff-name" data-i18n="difficulty.inferno">INFERNO</span>
+      <span class="diff-mult" data-diff-mult="2.2">x2.2</span>
+    </button>
+  </div>
+  <button class="btn btn-back" data-action="back-to-title" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<!-- ============================= SCHERMATA: SCEGLI 1 DI 3 (upgrade) ============================= -->
+<section id="screen-upgrade" class="screen hidden overlay-screen">
+  <h2 class="screen-title" data-i18n="upgrade.title">SCEGLI IL TUO POTENZIAMENTO</h2>
+  <div id="upgrade-choices" class="upgrade-grid"></div>
+</section>
+
+<!-- ============================= SCHERMATA: PAUSA ============================= -->
+<section id="screen-pause" class="screen hidden overlay-screen">
+  <h2 class="screen-title" data-i18n="pause.title">PAUSA</h2>
+  <div class="menu-stack">
+    <button class="btn btn-primary" data-action="resume" data-i18n="pause.resume">RIPRENDI</button>
+    <button class="btn" data-action="open-settings-from-pause" data-i18n="pause.settings">IMPOSTAZIONI</button>
+    <button class="btn btn-danger" data-action="quit-run" data-i18n="pause.quit">ABBANDONA RUN</button>
+  </div>
+</section>
+
+<!-- ============================= SCHERMATA: GAME OVER ============================= -->
+<section id="screen-gameover" class="screen hidden overlay-screen gameover-screen">
+  <h2 class="screen-title screen-title-danger gameover-title" data-i18n="gameover.title">SISTEMA COMPROMESSO</h2>
+  <p class="gameover-subtitle" data-i18n="gameover.subtitle">Segnale perso</p>
+
+  <div class="recap-grid">
+    <div class="recap-item"><span class="recap-value" id="recap-wave">0</span><span class="recap-label" data-i18n="gameover.wave">Ondata</span></div>
+    <div class="recap-item"><span class="recap-value" id="recap-kills">0</span><span class="recap-label" data-i18n="gameover.kills">Nemici uccisi</span></div>
+    <div class="recap-item recap-item-score"><span class="recap-value" id="recap-score">0</span><span class="recap-label" data-i18n="gameover.score">Punteggio</span></div>
+    <div class="recap-item"><span class="recap-value" id="recap-time">00:00</span><span class="recap-label" data-i18n="gameover.time">Sopravvissuto</span></div>
+    <div class="recap-item"><span class="recap-value" id="recap-gems-value">+0</span><span class="recap-label" data-i18n="gameover.gems_label">Gemme</span></div>
+  </div>
+
+  <div id="gameover-nickname-panel" class="account-panel hidden">
+    <p class="forgot-intro" data-i18n="gameover.nickname_intro">Stai giocando come ospite: scegli un nickname per comparire in classifica.</p>
+    <div class="gameover-nickname-inline">
+      <input class="input" id="gameover-nickname-input" type="text" maxlength="32" data-i18n-placeholder="account.nickname_placeholder" placeholder="Nickname">
+      <button class="btn btn-primary" id="btn-save-nickname" data-i18n="gameover.save_nickname">SALVA</button>
+    </div>
+    <div id="gameover-nickname-msg" class="account-success"></div>
+    <button class="link-btn hidden" id="gameover-nickname-suggestion-btn"></button>
+  </div>
+
+  <!-- v1.35.0 — invito discreto (non un modale invadente) a registrarsi
+       con un account, mostrato a chiunque stia ancora giocando da
+       ospite: indipendente dal pannello nickname sopra, che riguarda
+       solo la scelta del nome, non la protezione dei progressi. -->
+  <button class="link-btn gameover-save-account-btn hidden" id="btn-save-account-prompt" data-i18n="gameover.save_account_cta">Salva i tuoi progressi con un account</button>
+
+  <div class="gameover-social-row">
+    <div class="recap-streak hidden" id="recap-streak-line">🔥 0</div>
+    <div class="feedback-row" id="feedback-row">
+      <span class="feedback-question" data-i18n="feedback.question">Ti sei divertito?</span>
+      <button class="feedback-btn" id="feedback-up" aria-label="👍 sì">👍</button>
+      <button class="feedback-btn" id="feedback-down" aria-label="👎 no">👎</button>
+    </div>
+    <div class="feedback-thanks hidden" id="feedback-thanks" data-i18n="feedback.thanks">Grazie per il feedback!</div>
+    <button class="icon-btn share-icon-btn" id="btn-share-score" data-i18n-aria="gameover.share_aria" aria-label="Condividi punteggio">📤</button>
+  </div>
+
+  <div class="menu-stack menu-row">
+    <button class="btn btn-primary" data-action="retry" data-i18n="gameover.retry">RIGIOCA</button>
+    <button class="btn" data-action="back-to-title" data-i18n="gameover.menu">MENU</button>
+  </div>
+</section>
+
+<!-- ============================= SCHERMATA: NEGOZIO ============================= -->
+<section id="screen-shop" class="screen hidden">
+  <h2 class="screen-title"><span data-i18n="shop.title">NEGOZIO</span> <span class="gems-badge inline"><span id="shop-gems">0</span> ◆</span></h2>
+  <div id="shop-list" class="shop-list"></div>
+  <button class="btn btn-back" data-action="back-to-title" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<!-- ============================= SCHERMATA: MISSIONI ============================= -->
+<section id="screen-missions" class="screen hidden">
+  <h2 class="screen-title" data-i18n="missions.title">MISSIONI GIORNALIERE</h2>
+  <div class="tabs">
+    <button class="tab active" data-missions-tab="active" data-i18n="missions.tab_active">ATTIVE</button>
+    <button class="tab" data-missions-tab="completed" data-i18n="missions.tab_completed">COMPLETATE</button>
+    <button class="tab" data-missions-tab="achievements" data-i18n="missions.tab_achievements">TRAGUARDI</button>
+  </div>
+  <div id="missions-list" class="missions-list"></div>
+  <div id="achievements-panel" class="missions-list hidden">
+    <div class="tabs-secondary">
+      <button class="tab-small active" data-achievements-view="next" data-i18n="missions.achievements_view_next">PROSSIMI</button>
+      <button class="tab-small" data-achievements-view="overview" data-i18n="missions.achievements_view_overview">PANORAMICA</button>
+    </div>
+    <div id="achievements-list"></div>
+  </div>
+  <button class="btn btn-back" data-action="back-to-title" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<!-- ============================= SCHERMATA: CLASSIFICA ============================= -->
+<section id="screen-leaderboard" class="screen hidden">
+  <h2 class="screen-title" data-i18n="leaderboard.title">CLASSIFICA</h2>
+  <div class="tabs">
+    <button class="tab active" data-tab="global" data-i18n="leaderboard.global">GLOBALE</button>
+    <button class="tab" data-tab="personal" data-i18n="leaderboard.personal">LE MIE RUN</button>
+  </div>
+  <div class="tabs-secondary" id="leaderboard-diff-tabs">
+    <button class="tab-small" data-diff-tab="easy" data-i18n="difficulty.easy">FACILE</button>
+    <button class="tab-small active" data-diff-tab="normal" data-i18n="difficulty.normal">NORMALE</button>
+    <button class="tab-small" data-diff-tab="hard" data-i18n="difficulty.hard">DIFFICILE</button>
+    <button class="tab-small" data-diff-tab="inferno" data-i18n="difficulty.inferno">INFERNO</button>
+  </div>
+  <div id="leaderboard-list" class="leaderboard-list"></div>
+  <button class="btn btn-back" data-action="back-to-title" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<!-- ============================= SCHERMATA: ACCOUNT ============================= -->
+<section id="screen-account" class="screen hidden">
+  <h2 class="screen-title" data-i18n="account.title">ACCOUNT</h2>
+  <div id="account-logged-out" class="account-panel">
+    <input class="input" id="acc-nickname" type="text" data-i18n-placeholder="account.nickname_placeholder" placeholder="Nickname" maxlength="32">
+    <button class="btn btn-primary" data-action="guest-login" data-i18n="account.guest_login">GIOCA COME OSPITE</button>
+    <div class="divider" data-i18n="account.or">oppure</div>
+    <input class="input" id="acc-email" type="email" data-i18n-placeholder="account.email_placeholder" placeholder="Email">
+    <input class="input" id="acc-password" type="password" data-i18n-placeholder="account.password_placeholder" placeholder="Password">
+    <div class="row-buttons">
+      <button class="btn" data-action="do-register" data-i18n="account.register">REGISTRATI</button>
+      <button class="btn" data-action="do-login" data-i18n="account.login">ACCEDI</button>
+    </div>
+    <button class="link-btn" data-action="show-forgot" data-i18n="account.forgot">Password dimenticata?</button>
+    <button class="link-btn" id="account-privacy-link" data-i18n="account.privacy_link">Privacy Policy</button>
+    <div id="account-error" class="account-error"></div>
+    <button class="link-btn hidden" id="account-suggestion-btn"></button>
+  </div>
+  <div id="account-forgot" class="account-panel hidden">
+    <p class="forgot-intro" data-i18n="forgot.intro">Inserisci l'email dell'account: se registrata, riceverai un codice a 6 cifre valido 15 minuti.</p>
+    <input class="input" id="forgot-email" type="email" data-i18n-placeholder="account.email_placeholder" placeholder="Email">
+    <button class="btn" data-action="send-reset-code" data-i18n="forgot.send_code">INVIA CODICE</button>
+    <input class="input" id="forgot-code" type="text" inputmode="numeric" maxlength="6" data-i18n-placeholder="forgot.code_placeholder" placeholder="Codice a 6 cifre">
+    <input class="input" id="forgot-new-password" type="password" data-i18n-placeholder="forgot.new_password_placeholder" placeholder="Nuova password">
+    <button class="btn btn-primary" data-action="confirm-reset" data-i18n="forgot.confirm">REIMPOSTA PASSWORD</button>
+    <div id="forgot-error" class="account-error"></div>
+    <div id="forgot-success" class="account-success"></div>
+    <button class="link-btn" data-action="hide-forgot" data-i18n="forgot.back_to_login">Torna al login</button>
+  </div>
+  <div id="account-logged-in" class="account-panel hidden">
+    <p><span data-i18n="account.logged_in_as">Connesso come</span> <strong id="acc-current-nickname">—</strong></p>
+
+    <div class="account-subsection">
+      <span class="settings-label" data-i18n="account.change_nickname_label">Cambia nickname</span>
+      <div class="gameover-nickname-inline">
+        <input class="input" id="acc-change-nickname-input" type="text" maxlength="32" data-i18n-placeholder="account.nickname_placeholder" placeholder="Nickname">
+        <button class="btn" id="btn-change-nickname" data-i18n="gameover.save_nickname">SALVA</button>
+      </div>
+      <div id="acc-change-nickname-msg" class="account-error"></div>
+      <button class="link-btn hidden" id="acc-change-nickname-suggestion-btn"></button>
+    </div>
+
+    <button class="btn btn-danger" data-action="logout" data-i18n="account.logout">ESCI</button>
+
+    <button class="link-btn account-delete-link" id="btn-open-delete-account" data-i18n="account.delete_account_link">Elimina account</button>
+  </div>
+  <button class="btn btn-back" data-action="back-to-title" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<!-- ============================= SCHERMATA: IMPOSTAZIONI ============================= -->
+<section id="screen-settings" class="screen hidden">
+  <h2 class="screen-title" data-i18n="settings.title">IMPOSTAZIONI</h2>
+  <div class="settings-list">
+    <div class="settings-section-title" data-i18n="settings.audio">Audio</div>
+    <div class="settings-row">
+      <span class="settings-label" data-i18n="settings.sfx_enabled">Effetti sonori</span>
+      <button class="toggle-switch" id="setting-sfx-enabled" data-action="toggle-sfx" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+    </div>
+    <div class="settings-row settings-row-column">
+      <span class="settings-label" data-i18n="settings.sfx_volume">Volume effetti</span>
+      <input type="range" class="volume-slider" id="setting-sfx-volume" min="0" max="100" value="100">
+    </div>
+    <div class="settings-row">
+      <span class="settings-label" data-i18n="settings.music_enabled">Musica</span>
+      <button class="toggle-switch" id="setting-music-enabled" data-action="toggle-music" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+    </div>
+    <div class="settings-row settings-row-column">
+      <span class="settings-label" data-i18n="settings.music_volume">Volume musica</span>
+      <input type="range" class="volume-slider" id="setting-music-volume" min="0" max="100" value="60">
+    </div>
+    <div class="settings-row">
+      <span class="settings-label" data-i18n="settings.language">Lingua</span>
+      <select class="select-input" id="setting-language"></select>
+    </div>
+    <div class="settings-row settings-row-column">
+      <span class="settings-label" data-i18n="settings.controls">Controlli</span>
+      <div class="control-scheme-options" id="control-scheme-options"></div>
+      <button class="btn btn-small hidden" id="btn-tilt-permission" data-i18n="settings.request_tilt_permission">Abilita sensori di movimento</button>
+      <button class="btn btn-small hidden" id="btn-tilt-calibrate" data-i18n="settings.tilt_calibrate_button">Calibra</button>
+    </div>
+    <div class="settings-row settings-row-column hidden" id="dpad-side-row">
+      <span class="settings-label" data-i18n="settings.dpad_side">Lato D-pad</span>
+      <div class="control-scheme-options" id="dpad-side-options"></div>
+    </div>
+    <div class="settings-row settings-row-column hidden" id="dpad-size-row">
+      <span class="settings-label" data-i18n="settings.dpad_size">Dimensione D-pad</span>
+      <div class="control-scheme-options" id="dpad-size-options"></div>
+    </div>
+    <div class="settings-row settings-row-column">
+      <span class="settings-label" data-i18n="settings.player_position">Posizione Giocatore</span>
+      <div class="control-scheme-options" id="player-position-options"></div>
+    </div>
+    <div class="settings-row settings-row-column hidden" id="pointer-speed-row">
+      <span class="settings-label" data-i18n="settings.pointer_speed_mode">Velocità movimento</span>
+      <div class="control-scheme-options" id="pointer-speed-options"></div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label" data-i18n="settings.colorblind">Modalità Daltonici</span>
+      <button class="toggle-switch" id="setting-colorblind" data-action="toggle-colorblind" role="switch" aria-checked="false"><span class="toggle-knob"></span></button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label" data-i18n="settings.enhanced_fx">Effetti Avanzati</span>
+      <button class="toggle-switch" id="setting-enhanced-fx" data-action="toggle-enhanced-fx" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+    </div>
+    <div class="settings-row settings-row-column hidden" id="skin-row">
+      <span class="settings-label" data-i18n="settings.skin">Skin</span>
+      <div class="control-scheme-options" id="skin-options"></div>
+    </div>
+    <div class="settings-row settings-row-column hidden" id="starting-weapon-row">
+      <span class="settings-label" data-i18n="settings.starting_weapon">Arma di partenza</span>
+      <div class="control-scheme-options" id="starting-weapon-options"></div>
+    </div>
+  </div>
+  <button class="btn btn-back" data-action="close-settings" data-i18n="common.back">INDIETRO</button>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- ============================= MODALE CHANGELOG ============================= -->
+<div id="changelog-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="common.changelog">Changelog</h2>
+    <div class="modal-scroll">
+
+      <div id="changelog-body-it" class="changelog-lang">
+        <div class="changelog-entry">
+          <h3>v1.37.1</h3>
+          <ul><li>Corretta una falla residua: un ospite poteva ancora impostare un nickname già registrato da qualcun altro (schermata di game over e creazione ospite).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.37.0</h3>
+          <ul>
+            <li>Corretto alla radice il bug "nickname già in uso" su sé stessi: ora protetto solo tra utenti registrati.</li>
+            <li>Nuovo modale informativo dopo "Gioca" per chi gioca da ospite, con link diretto alla registrazione.</li>
+            <li>Cambio nickname ed eliminazione account nella schermata Account.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.36.0</h3>
+          <ul>
+            <li>Corretto un bug del database: 6 missioni giornaliere condividevano lo stesso ID, impedendo il riscatto di alcune (es. "Sconfiggi un boss").</li>
+            <li>La registrazione a fine partita ora avviene in un modale, senza lasciare la schermata di game over.</li>
+            <li>Nuovo manuale completo nella landing page.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.35.0</h3>
+          <ul>
+            <li>Corretto un bug: un ospite con nickname già scelto non riusciva a registrarsi ("nickname già in uso" su sé stesso).</li>
+            <li>Missioni e Traguardi ora visibili anche da ospite, ma il riscatto richiede la registrazione.</li>
+            <li>Rimosso il prompt nickname pre-partita; nuovo invito a salvare i progressi con un account a fine partita.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.34.0</h3>
+          <ul>
+            <li>Corretto un bug importante: le run lunghe con boss di alto livello venivano rifiutate in blocco, senza punteggio né gemme.</li>
+            <li>Corretto lo sfasamento delle gemme tra negozio e schermata principale dopo il riscatto di missioni/traguardi.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.33.0</h3>
+          <ul>
+            <li>Nuovi "Traguardi": missioni a progressione permanente su 6 categorie, con 6 skin esclusive sbloccabili solo completandoli.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.32.0</h3>
+          <ul>
+            <li>Corretto un bug reale nell'Impulso Magnetico (i pickup lontani potevano schizzare via invece di avvicinarsi).</li>
+            <li>Magnete e Impulso Magnetico unificati in un solo passivo a 4 stage, con indicatore visivo del raggio.</li>
+            <li>Corrette tre percentuali sbagliate nei potenziamenti; le descrizioni ora mostrano sempre il totale attuale, il prossimo e il massimo.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.31.0</h3>
+          <ul>
+            <li>Corretto un bug audio su iOS (musica ed effetti muti dopo standby/cambio app).</li>
+            <li>Musica già dal menu principale. "Vero duello" contro i boss: i nemici regolari si spazzano via al suo arrivo.</li>
+            <li>6 nuove missioni giornaliere, ora archiviate in un tab "Completate" separato una volta riscattate.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.30.0</h3>
+          <ul>
+            <li>Corretta la barra del boss che restava visibile dopo la sconfitta.</li>
+            <li>Nuova modalità infinita dopo il ventesimo boss: il roster ricomincia con una crescita più dolce, marcata da "✦N" nel nome.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.29.0</h3>
+          <ul>
+            <li>Corretto un bug importante: gli attacchi a distanza dei boss non scattavano quasi mai su schermi a 60Hz. Ora tutti i boss sparano davvero, con difficoltà d'attacco calibrata dal primo all'ultimo.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.28.0</h3>
+          <ul>
+            <li>Ondate "blindate" durante i boss: niente più nemici regolari che si accumulano durante il combattimento. Corretto anche il timer del prossimo boss.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.27.0</h3>
+          <ul>
+            <li>Nuove skin per le armi (Laser, Railgun, Drone), offerta del giorno a rotazione, loadout di partenza personalizzabile, bundle scontati.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.26.0</h3>
+          <ul>
+            <li>4 nuove skin: Nucleo Pulsante, Sentinella, Sovraccarico, Spettro.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.25.0</h3>
+          <ul>
+            <li>4 nuove armi: Boomerang, Fulmine a Catena, Railgun, Drone Orbitale.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.24.0</h3>
+          <ul>
+            <li>4 nuovi nemici: Divisore, Corazzato (scudo rotante), Teletrasportatore, Evocatore.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.23.0</h3>
+          <ul>
+            <li>4 nuovi potenziamenti: Spine Ritorsive, Secondo Fiato, Impulso Magnetico, Campo Rallentante.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.22.0</h3>
+          <ul>
+            <li>Ridotta la durata dei proiettili homing: restavano in volo troppo a lungo cacciando più nemici da soli, specialmente a danno elevato.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.21.0</h3>
+          <ul>
+            <li>Corretto un bug importante: gli acquisti del negozio (armi e skin) non avevano alcun effetto reale in partita. Ora funzionano davvero.</li>
+            <li>Nuova riga "Skin" nelle Impostazioni per scegliere tra le skin possedute.</li>
+            <li>Card punteggio condivisibile molto più grande e leggibile, con nuova tagline promozionale.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.20.0</h3>
+          <ul>
+            <li>Rimossa la generazione automatica di nickname per gli ospiti ("Player1234"): ora chi non imposta un nickname compare come "Ospite" e la sua run non viene salvata né in classifica.</li>
+            <li>Nuovo indicatore di chi è online in questo momento, in schermata titolo.</li>
+            <li>Badge gemme e streak sulla stessa riga in schermata titolo.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.19.0</h3>
+          <ul>
+            <li>Schermata di fine partita ristrutturata: nessuno scroll in orizzontale nemmeno sui telefoni più piccoli, punteggio messo in maggiore evidenza, nuovo riquadro Gemme, layout più compatto e ordinato.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.1</h3>
+          <ul>
+            <li>I 4 riquadri del riepilogo fine partita ora stanno su una riga anche su desktop.</li>
+            <li>Nuovo titolo di fine partita: "Sistema compromesso" / "Segnale perso".</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.0</h3>
+          <ul>
+            <li>Corretto il testo illeggibile nelle card di scelta potenziamento su alcuni browser desktop.</li>
+            <li>Nuovo streak giornaliero, con bonus gemme crescente per i giorni consecutivi giocati.</li>
+            <li>Card punteggio condivisibile a fine partita.</li>
+            <li>Feedback rapido 👍/👎 post-partita.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.17.0</h3>
+          <ul>
+            <li>Nuova difficoltà "Facile", per chi trovava il gioco troppo punitivo: nemici più deboli e player più forte fin dall'inizio.</li>
+            <li>Classifica arricchita con ondata/uccisioni/durata per ogni voce, e separata per difficoltà.</li>
+            <li>Menu, schermate e modali riorganizzati per sfruttare meglio lo schermo in orizzontale.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.1</h3>
+          <ul>
+            <li>Cambiato il genere della colonna sonora: da vaporwave/ambient a dark/hard techno (tracce standard) e drum'n'bass (tracce boss), decisamente più energetico.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.0</h3>
+          <ul>
+            <li>Corretto il modale di calibrazione sensori, inutilizzabile in orizzontale su schermi bassi.</li>
+            <li>Nuova colonna sonora: 20 loop ambient vaporwave/synthwave che ruotano casualmente, più 20 loop specifici dei boss.</li>
+            <li>Nuova sezione Audio nelle Impostazioni, con volume separato per effetti e musica.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.15.0</h3>
+          <ul>
+            <li>Corretto un bug per cui i controlli a inclinazione risultavano invertiti passando dal verticale all'orizzontale (o viceversa) tra calibrazione e partita.</li>
+            <li>Nuovo prompt per scegliere un nickname prima di iniziare la partita, con possibilità di saltare.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.2</h3>
+          <ul><li>Privacy Policy corretta: Umami è un servizio cloud di terze parti, non self-hosted.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.1</h3>
+          <ul><li>Privacy Policy aggiornata per l'introduzione di Umami Analytics (statistiche anonime, senza cookie).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.0</h3>
+          <ul>
+            <li>Landing page ora completamente bilingue IT/EN (changelog e classifica inclusi).</li>
+            <li>Corretto un bug per cui la landing page non scrollava su desktop.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.13.0</h3>
+          <ul>
+            <li>Riorganizzati i file principali: il gioco è ora "game.html", la landing page pubblica è "index.html" (servita di default alla root del sito).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.11.0</h3>
+          <ul>
+            <li>Corretto un bug importante sui proiettili homing: cambiavano bersaglio ad ogni frame invece di restare agganciati, facendoli ondeggiare senza mai colpire nulla. Ora agganciano un bersaglio fisso per tutta la loro vita.</li>
+            <li>Aggiunta una durata massima di vita per tutti i proiettili (3.5s): superata, svaniscono in 500ms invece di poter vagare indefinitamente.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.1</h3>
+          <ul>
+            <li>Il prompt di rotazione ora compare solo subito prima di avviare una partita, non più nei menu (che restano pensati per il verticale).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.0</h3>
+          <ul>
+            <li>Prompt di rotazione su mobile: suggerisce di girare il dispositivo in orizzontale, lasciando comunque la possibilità di continuare in verticale.</li>
+            <li>Nuovo D-pad virtuale come schema di controllo su mobile, a trascinamento (mai a tocco), configurabile per lato e dimensione.</li>
+            <li>Calibrazione dei sensori di movimento con livella virtuale, per impostare il punto zero nella propria posizione di gioco preferita.</li>
+            <li>I nickname ora devono essere unici (non case-sensitive): non è più possibile registrarne uno già in uso da un altro utente.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.9.0</h3>
+          <ul>
+            <li>Il gioco è ora una PWA installabile su Android e iOS direttamente dal browser, con icona dedicata e supporto offline parziale per un caricamento più veloce.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.8.0</h3>
+          <ul>
+            <li>Curva di difficoltà ammorbidita (era diventata troppo dura in v1.6.0).</li>
+            <li>Nuova Bomba EMP: fino a 2 cariche, azzera i nemici a schermo ma non i boss, attivabile col tasto E o dal pulsante dedicato.</li>
+            <li>Aggiunta la Privacy Policy conforme al GDPR, raggiungibile dal footer e dalla schermata Account.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.7.0</h3>
+          <ul>
+            <li>Roster boss esteso da 3 a 20: 19 boss regolari con forza crescente, più un 20° boss finale nettamente più tosto con tutti i pattern d'attacco e un nuovo attacco a raffica su 360°.</li>
+            <li>Nuovo aspetto dei boss: anelli poligonali concentrici in rotazione (che si spezzano perdendo HP) con satelliti triangolari orbitanti, invece del vecchio pallino colorato.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.6.0</h3>
+          <ul>
+            <li>Bilanciamento: nemici e boss ora diventano più forti col passare del tempo durante la run, non solo in base alla difficoltà scelta — prima diventava troppo facile dopo qualche minuto.</li>
+            <li>Massimali dei potenziamenti ridotti per evitare crescita eccessiva di danno/cadenza/rigenerazione.</li>
+            <li>Vampirismo reso temporaneo (12 secondi di cura attiva, si rinnova risceglendolo) invece di un bonus permanente che si accumulava per sempre.</li>
+            <li>I nemici sono ora triangoli allungati che puntano verso il player, invece di pallini.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.5.0</h3>
+          <ul>
+            <li>Corretto un bug per cui run lunghe e legittime potevano essere scartate dal server (0 gemme guadagnate nonostante una buona partita): soglie anti-cheat ricalibrate sul reale ritmo di gioco.</li>
+            <li>Sistema di potenziamenti in-game ora davvero progressivo: ogni potenziamento (arma esclusa) ha più livelli, mostrati in-game come "Lv. X/Y", invece di fermarsi al primo utilizzo.</li>
+            <li>Anche le modalità di tiro (multi-shot, perforante, rimbalzante, homing, esplosivo) ora scalano di livello invece di essere acquisibili una sola volta.</li>
+            <li>Due nuovi potenziamenti: Colpo Critico e Vampirismo.</li>
+            <li>Changelog in-app disponibile anche in inglese (in italiano se la lingua è italiano, in inglese per tutte le altre).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.4.0</h3>
+          <ul>
+            <li>Il prompt per scegliere un nickname a fine partita ora appare solo se non hai un account e non hai ancora impostato un nickname tuo.</li>
+            <li>Il player non si ferma più raggiunta la posizione del dito/mouse: nuova impostazione "Velocità movimento" con modalità Costante o Proporzionale alla distanza.</li>
+            <li>Aggiunto questo changelog, apribile dal titolo.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.3.0</h3>
+          <ul>
+            <li>Impostazione "Posizione Giocatore": in basso (classica) o al centro dello schermo.</li>
+            <li>Possibilità di scegliere un nickname a fine partita per comparire in classifica da ospiti.</li>
+            <li>Indicatore nella schermata principale che mostra se sei connesso e con quale nickname.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.2.0</h3>
+          <ul>
+            <li>Controlli mobile/desktop: il player segue il dito o il puntatore del mouse, oltre a tastiera e inclinazione del dispositivo.</li>
+            <li>Menu Impostazioni: audio on/off, lingua, schema di controllo, modalità Daltonici, Effetti Avanzati.</li>
+            <li>Interfaccia tradotta in 7 lingue: IT, EN, ES, FR, DE, SL, RU.</li>
+            <li>Modalità Daltonici e Effetti Avanzati opzionali (scie, glow, vignetta HP basso).</li>
+            <li>Corretto il movimento non funzionante su mobile e l'icona poco chiara del pulsante pausa.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.1.0</h3>
+          <ul>
+            <li>Reset password self-service via codice a 6 cifre inviato per email.</li>
+            <li>Corretta l'autenticazione che falliva su alcuni hosting condivisi.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.0.0</h3>
+          <ul>
+            <li>Prima versione: gameplay completo, backend PHP/MySQL, anti-cheat di base.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="changelog-body-en" class="changelog-lang hidden">
+        <div class="changelog-entry">
+          <h3>v1.37.1</h3>
+          <ul><li>Fixed a remaining gap: a guest could still set a nickname already registered by someone else (game-over screen and guest creation).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.37.0</h3>
+          <ul>
+            <li>Fixed the "nickname already in use" bug at its root: now protected only among registered users.</li>
+            <li>New info modal after "Play" for guests, with a direct link to registration.</li>
+            <li>Change nickname and delete account from the Account screen.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.36.0</h3>
+          <ul>
+            <li>Fixed a database bug: 6 daily missions shared the same ID, blocking claims on some of them (e.g. "Defeat a boss").</li>
+            <li>Registering at game over now happens in a modal, without leaving the game-over screen.</li>
+            <li>New full manual on the landing page.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.35.0</h3>
+          <ul>
+            <li>Fixed a bug: a guest who had already picked a nickname couldn't register ("nickname already taken" on their own name).</li>
+            <li>Missions and Milestones are now visible as a guest too, but claiming requires registration.</li>
+            <li>Removed the pre-run nickname prompt; new "save your progress with an account" prompt at game over.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.34.0</h3>
+          <ul>
+            <li>Fixed a major bug: long runs with high-tier boss kills were rejected outright, with no score or gems awarded.</li>
+            <li>Fixed a gem-count mismatch between the shop and the main screen after claiming missions/milestones.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.33.0</h3>
+          <ul>
+            <li>New "Milestones": permanent progression across 6 categories, with 6 exclusive skins unlockable only by completing them.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.32.0</h3>
+          <ul>
+            <li>Fixed a real Magnet Pulse bug (far-away pickups could shoot away instead of approaching).</li>
+            <li>Magnet and Magnet Pulse unified into a single 4-stage passive, with a visual radius indicator.</li>
+            <li>Fixed three wrong percentages on passives; descriptions now always show current total, next, and max.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.31.0</h3>
+          <ul>
+            <li>Fixed an iOS audio bug (music/sfx silent after standby or switching apps).</li>
+            <li>Music now plays from the main menu. "True boss duel": regular enemies clear out when a boss arrives.</li>
+            <li>6 new daily missions, now archived in a separate "Completed" tab once claimed.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.30.0</h3>
+          <ul>
+            <li>Fixed the boss bar staying visible after defeat.</li>
+            <li>New endless mode past the 20th boss: the roster restarts with gentler growth, marked by "✦N" in the name.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.29.0</h3>
+          <ul>
+            <li>Fixed a major bug: boss ranged attacks almost never fired on 60Hz screens. All bosses now actually shoot, with attack difficulty tuned from first to last.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.28.0</h3>
+          <ul>
+            <li>"Sealed" waves during boss fights: no more regular enemies piling up during the fight. Also fixed the next-boss timer.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.27.0</h3>
+          <ul>
+            <li>New weapon skins (Laser, Railgun, Drone), rotating daily deal, customizable starting loadout, discounted bundles.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.26.0</h3>
+          <ul>
+            <li>4 new skins: Pulse Core, Sentinel, Overcharge, Spectre.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.25.0</h3>
+          <ul>
+            <li>4 new weapons: Boomerang, Chain Lightning, Railgun, Orbital Drone.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.24.0</h3>
+          <ul>
+            <li>4 new enemies: Splitter, Shielded (rotating shield), Teleporter, Summoner.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.23.0</h3>
+          <ul>
+            <li>4 new passives: Retaliation Spikes, Second Wind, Magnet Pulse, Slowing Field.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.22.0</h3>
+          <ul>
+            <li>Reduced homing projectile lifetime: they stayed airborne too long hunting down multiple enemies on their own, especially at high damage.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.21.0</h3>
+          <ul>
+            <li>Fixed a major bug: shop purchases (weapons and skins) had no real effect in-game. They now actually work.</li>
+            <li>New "Skin" row in Settings to choose among owned skins.</li>
+            <li>Shareable score card made much bigger and more readable, with a new promotional tagline.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.20.0</h3>
+          <ul>
+            <li>Removed automatic nickname generation for guests ("Player1234"): anyone who doesn't set a nickname now shows as "Guest" and their run isn't saved or added to the leaderboard.</li>
+            <li>New indicator showing who's online right now, on the title screen.</li>
+            <li>Gems and streak badges now on the same row on the title screen.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.19.0</h3>
+          <ul>
+            <li>Game-over screen restructured: no landscape scrolling even on the smallest phones, score given more emphasis, new Gems box, more compact and tidy layout.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.1</h3>
+          <ul>
+            <li>The 4 game-over recap boxes now sit on one row on desktop too.</li>
+            <li>New game-over title: "System compromised" / "Signal lost".</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.18.0</h3>
+          <ul>
+            <li>Fixed unreadable text in upgrade choice cards on some desktop browsers.</li>
+            <li>New daily streak, with a growing gem bonus for consecutive days played.</li>
+            <li>Shareable score card at the end of a run.</li>
+            <li>Quick 👍/👎 post-run feedback.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.17.0</h3>
+          <ul>
+            <li>New "Easy" difficulty, for anyone finding the game too punishing: weaker enemies and a stronger player right from the start.</li>
+            <li>Leaderboard enriched with wave/kills/duration for every entry, and split by difficulty.</li>
+            <li>Menus, screens and modals reorganized to make better use of landscape screen space.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.1</h3>
+          <ul>
+            <li>Changed the soundtrack genre: from vaporwave/ambient to dark/hard techno (standard tracks) and drum'n'bass (boss tracks), decidedly more energetic.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.16.0</h3>
+          <ul>
+            <li>Fixed the sensor calibration modal, unusable in landscape on short screens.</li>
+            <li>New soundtrack: 20 rotating ambient vaporwave/synthwave loops, plus 20 boss-specific loops.</li>
+            <li>New Audio section in Settings, with separate volume for effects and music.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.15.0</h3>
+          <ul>
+            <li>Fixed a bug where tilt controls came out inverted when switching between portrait and landscape between calibration and gameplay.</li>
+            <li>New prompt to choose a nickname before starting a match, with the option to skip.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.2</h3>
+          <ul><li>Privacy Policy corrected: Umami is a third-party cloud service, not self-hosted.</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.1</h3>
+          <ul><li>Privacy Policy updated for the introduction of Umami Analytics (anonymous statistics, no cookies).</li></ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.14.0</h3>
+          <ul>
+            <li>Landing page now fully bilingual IT/EN (changelog and leaderboard included).</li>
+            <li>Fixed a bug where the landing page didn't scroll on desktop.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.13.0</h3>
+          <ul>
+            <li>Reorganized the main files: the game is now "game.html", the public landing page is "index.html" (served by default at the site root).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.11.0</h3>
+          <ul>
+            <li>Fixed a major bug with homing projectiles: they switched targets every frame instead of staying locked, making them wobble around without ever hitting anything. They now lock onto a fixed target for their whole lifetime.</li>
+            <li>Added a maximum lifetime for all projectiles (3.5s): once exceeded, they fade out in 500ms instead of potentially wandering indefinitely.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.1</h3>
+          <ul>
+            <li>The rotation prompt now only appears right before starting a match, no longer in the menus (which remain designed for portrait).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.10.0</h3>
+          <ul>
+            <li>Rotation prompt on mobile: suggests turning the device to landscape, while still allowing you to continue in portrait.</li>
+            <li>New virtual D-pad control scheme on mobile, drag-only (never tap), configurable side and size.</li>
+            <li>Motion sensor calibration with a virtual level, to set the zero point at your preferred playing position.</li>
+            <li>Nicknames must now be unique (case-insensitive): you can no longer register one already used by another user.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.9.0</h3>
+          <ul>
+            <li>The game is now a PWA, installable on Android and iOS straight from the browser, with a dedicated icon and partial offline support for faster loading.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.8.0</h3>
+          <ul>
+            <li>Softened difficulty curve (had become too harsh in v1.6.0).</li>
+            <li>New EMP Bomb: up to 2 charges, wipes out on-screen enemies but not bosses, triggered with the E key or a dedicated button.</li>
+            <li>Added a GDPR-compliant Privacy Policy, reachable from the footer and the Account screen.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.7.0</h3>
+          <ul>
+            <li>Boss roster expanded from 3 to 20: 19 regular bosses with growing strength, plus a 20th final boss, notably tougher, with every attack pattern and a new 360° burst attack.</li>
+            <li>New boss look: rotating concentric polygon rings (which break apart as HP drops) with orbiting triangular satellites, instead of the old colored dot.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.6.0</h3>
+          <ul>
+            <li>Balance: enemies and bosses now grow stronger over time during a run, not just based on the chosen difficulty — the game used to become too easy after a few minutes.</li>
+            <li>Upgrade caps reduced to avoid excessive damage/fire-rate/regen growth.</li>
+            <li>Lifesteal is now temporary (12 seconds of active healing, refreshes if picked again) instead of a permanent bonus that stacked forever.</li>
+            <li>Enemies are now elongated triangles pointing at the player, instead of dots.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.5.0</h3>
+          <ul>
+            <li>Fixed a bug where long, legitimate runs could be rejected by the server (0 gems earned despite a good run): anti-cheat thresholds recalibrated to match the actual game pace.</li>
+            <li>In-game upgrade system is now truly progressive: every upgrade (weapons excluded) has multiple levels, shown in-game as "Lv. X/Y", instead of stopping after the first pick.</li>
+            <li>Fire modes (multi-shot, piercing, bouncing, homing, explosive) now scale with level too, instead of being one-time unlocks.</li>
+            <li>Two new upgrades: Critical Hit and Lifesteal.</li>
+            <li>The in-app changelog is now also available in English (Italian if your language is Italian, English for every other language).</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.4.0</h3>
+          <ul>
+            <li>The nickname prompt at game over now only appears if you're not logged in with a real account and haven't set a custom nickname yet.</li>
+            <li>The player no longer stops upon reaching the finger/mouse position: new "Movement Speed" setting with Constant or Proportional-to-distance modes.</li>
+            <li>Added this changelog, opened from the title screen.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.3.0</h3>
+          <ul>
+            <li>"Player Position" setting: bottom (classic) or centered on screen.</li>
+            <li>Ability to choose a nickname at game over to appear on the leaderboard as a guest.</li>
+            <li>Indicator on the main screen showing whether you're logged in and with which nickname.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.2.0</h3>
+          <ul>
+            <li>Mobile/desktop controls: the player follows your finger or mouse pointer, in addition to keyboard and device tilt.</li>
+            <li>Settings menu: audio on/off, language, control scheme, Colorblind Mode, Enhanced FX.</li>
+            <li>Interface translated into 7 languages: IT, EN, ES, FR, DE, SL, RU.</li>
+            <li>Optional Colorblind Mode and Enhanced FX (trails, glow, low-HP vignette).</li>
+            <li>Fixed movement not working on mobile and an unclear pause button icon.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.1.0</h3>
+          <ul>
+            <li>Self-service password reset via a 6-digit code sent by email.</li>
+            <li>Fixed authentication failing on some shared hosting setups.</li>
+          </ul>
+        </div>
+        <div class="changelog-entry">
+          <h3>v1.0.0</h3>
+          <ul>
+            <li>First release: full gameplay, PHP/MySQL backend, basic anti-cheat.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+    <button class="btn btn-primary" id="changelog-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- ============================= MODALE PRIVACY POLICY ============================= -->
+<div id="privacy-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="account.privacy_link">Privacy Policy</h2>
+    <div class="modal-scroll">
+
+      <div id="privacy-body-it" class="changelog-lang">
+        <div class="changelog-entry">
+          <p><em>Ultimo aggiornamento: settembre 2026.</em></p>
+          <h3>1. Titolare del trattamento</h3>
+          <p>Il titolare del trattamento dei dati raccolti tramite NEON HORDE è il gestore del sito su cui il gioco è pubblicato, contattabile all'indirizzo <strong>sputnik@sputlab.com</strong>. Per richieste relative ai tuoi dati personali (accesso, rettifica, cancellazione, ecc.) scrivi a questo indirizzo.</p>
+
+          <h3>2. Dati raccolti e finalità</h3>
+          <p><strong>Account registrato (facoltativo):</strong> email e password (la password è memorizzata solo in forma crittografata/hash, mai in chiaro) — usate per farti accedere e per il recupero password. Nickname, scelto da te — mostrato pubblicamente in classifica.</p>
+          <p><strong>Account ospite:</strong> se giochi senza registrarti, viene creato un account "ospite" con un nickname generato casualmente (che puoi personalizzare) e nessun altro dato personale.</p>
+          <p><strong>Dati di gioco:</strong> punteggi, ondata raggiunta, nemici uccisi, durata partita, difficoltà, boss sconfitti, gemme guadagnate, oggetti acquistati nel negozio, progresso missioni giornaliere — associati al tuo account per far funzionare classifica, negozio e missioni.</p>
+          <p><strong>Token di sessione:</strong> un codice casuale che identifica la tua sessione di accesso, con scadenza automatica dopo 30 giorni di inattività. Non è un cookie: è conservato solo nella memoria locale del tuo browser (localStorage) e inviato al server ad ogni richiesta per autenticarti.</p>
+          <p><strong>Indirizzo IP:</strong> processato in modo transitorio (non salvato in modo permanente nel database) per limitare richieste eccessive da uno stesso indirizzo (protezione anti-abuso). Il tuo indirizzo IP potrebbe inoltre comparire nei log tecnici standard del server web, indipendentemente da questa applicazione.</p>
+          <p><strong>Impostazioni di gioco:</strong> lingua, audio on/off, schema di controllo, modalità Daltonici, Effetti Avanzati e simili sono salvate solo nella memoria locale del tuo browser (localStorage) e non vengono mai inviate al server.</p>
+          <p><strong>Dati statistici di utilizzo (analytics):</strong> utilizziamo <strong>Umami Analytics</strong>, nella versione cloud fornita da Umami (Umami Cloud), per raccogliere statistiche sul traffico del sito: pagine visitate, sito di provenienza, tipo di dispositivo/browser, paese approssimativo, durata della visita. Umami non installa cookie sul tuo dispositivo e non raccoglie informazioni che ti identifichino direttamente (nome, email, ecc.). Per calcolare i visitatori unici, il tuo indirizzo IP viene combinato con altri dati tecnici (tipo di browser, dominio) e trasformato in un codice hash che cambia ogni giorno — il tuo IP non viene mai salvato in chiaro. Va detto con onestà che, secondo l'interpretazione prevalente del GDPR, un identificativo di questo tipo (pseudonimizzato) resta comunque considerato "dato personale" anche se non permette di risalire direttamente a te: per questo lo trattiamo con le stesse tutele previste per gli altri dati di navigazione. Essendo un servizio cloud di terze parti, questi dati vengono elaborati sui server di Umami, non sui nostri — vedi il punto 5 per i dettagli.</p>
+
+          <h3>3. Base giuridica</h3>
+          <p>Il trattamento dei dati di account e di gioco è necessario per fornirti il servizio richiesto (creare un account, salvare i punteggi, mostrare la classifica) — art. 6, par. 1, lett. b) GDPR. Il trattamento dell'indirizzo IP per la protezione anti-abuso e per le statistiche di utilizzo tramite Umami si basa sul legittimo interesse a garantire la sicurezza del servizio e a comprendere come viene utilizzato — art. 6, par. 1, lett. f) GDPR. Non essendo impiegati cookie né tecniche di profilazione o tracciamento cross-site, riteniamo che questo trattamento possa avvenire in legittimo interesse senza richiedere un consenso preventivo separato; resta comunque tuo diritto opporti in qualsiasi momento scrivendo all'indirizzo indicato al punto 1.</p>
+
+          <h3>4. Cookie</h3>
+          <p>Questo gioco <strong>non utilizza cookie</strong>. L'autenticazione e le preferenze sono gestite tramite la memoria locale del browser (localStorage), che resta sul tuo dispositivo e non viene condivisa con terze parti. Anche lo strumento di analisi statistica (Umami) è cookieless per design: non imposta alcun cookie sul tuo dispositivo. Se installi il gioco come app (PWA), un Service Worker salva in cache sul tuo dispositivo i soli file statici dell'app (HTML/CSS/JS/icone) per velocizzare i caricamenti successivi e consentire un uso parziale offline — anche questa cache resta locale al dispositivo e non contiene dati personali.</p>
+
+          <h3>5. Servizi di terze parti</h3>
+          <p>I caratteri tipografici del gioco ("Chakra Petch", "Space Mono") sono caricati dai server di Google Fonts (fonts.googleapis.com, fonts.gstatic.com). Il tuo browser effettua quindi una richiesta diretta ai server di Google per scaricarli, e Google potrebbe di conseguenza processare il tuo indirizzo IP secondo la propria informativa privacy.</p>
+          <p><strong>Umami Cloud</strong> (umami.is): le statistiche di utilizzo del sito sono gestite tramite il servizio cloud di Umami, un fornitore terzo. Il tuo browser invia direttamente a Umami i dati tecnici descritti al punto 2 (pagine visitate, dispositivo/browser, paese approssimativo, e l'indirizzo IP trasformato in hash giornaliero). Trattandosi di un servizio ospitato da un fornitore esterno, l'elaborazione potrebbe avvenire anche su server ubicati al di fuori dello Spazio Economico Europeo (SEE); in tal caso il trasferimento si basa sulle garanzie previste dal fornitore (clausole contrattuali standard o meccanismi equivalenti richiesti dal GDPR). Per l'informativa completa di Umami consulta <strong>umami.is/privacy</strong>.</p>
+          <p>Non viene mostrata pubblicità di alcun tipo, e i tuoi dati non vengono venduti a terzi.</p>
+          <h3>6. Conservazione dei dati</h3>
+          <p>I dati di account e di gioco vengono conservati finché il tuo account resta attivo. Se desideri la cancellazione del tuo account e dei dati associati, scrivi all'indirizzo indicato al punto 1: la richiesta verrà evasa manualmente, non essendo al momento disponibile una funzione di autocancellazione nell'app.</p>
+
+          <h3>7. I tuoi diritti</h3>
+          <p>In quanto interessato puoi richiedere in qualsiasi momento: accesso ai tuoi dati, rettifica di dati inesatti, cancellazione ("diritto all'oblio"), limitazione del trattamento, portabilità dei dati, opposizione al trattamento (artt. 15-22 GDPR). Puoi inoltre proporre reclamo all'autorità di controllo competente (in Italia, il Garante per la protezione dei dati personali, www.garanteprivacy.it).</p>
+
+          <h3>8. Minori</h3>
+          <p>Il gioco non richiede né verifica l'età degli utenti e non raccoglie consapevolmente dati di minori al di sotto della soglia prevista dalla normativa applicabile. Se sei un genitore/tutore e ritieni che un minore abbia fornito dati personali, contattaci per la rimozione.</p>
+
+          <h3>9. Sicurezza</h3>
+          <p>Le password sono conservate solo in forma crittografata (hash), le comunicazioni con il server dovrebbero avvenire tramite HTTPS (verifica che il tuo hosting lo supporti), e l'accesso ai dati è protetto da token di sessione con scadenza automatica.</p>
+
+          <h3>10. Modifiche</h3>
+          <p>Questa informativa può essere aggiornata nel tempo; la data in cima al documento indica l'ultima revisione.</p>
+        </div>
+      </div>
+
+      <div id="privacy-body-en" class="changelog-lang hidden">
+        <div class="changelog-entry">
+          <p><em>Last updated: September 2026.</em></p>
+          <h3>1. Data Controller</h3>
+          <p>The data controller for information collected through NEON HORDE is the operator of the site hosting the game, reachable at <strong>sputnik@sputlab.com</strong>. For any request regarding your personal data (access, rectification, deletion, etc.) please write to this address.</p>
+
+          <h3>2. Data collected and purposes</h3>
+          <p><strong>Registered account (optional):</strong> email and password (the password is stored only in encrypted/hashed form, never in plain text) — used to log you in and for password recovery. Nickname, chosen by you — shown publicly on the leaderboard.</p>
+          <p><strong>Guest account:</strong> if you play without registering, a "guest" account is created with a randomly generated nickname (which you can personalize) and no other personal data.</p>
+          <p><strong>Gameplay data:</strong> scores, wave reached, enemies killed, run duration, difficulty, bosses defeated, gems earned, shop items purchased, daily mission progress — linked to your account to make the leaderboard, shop and missions work.</p>
+          <p><strong>Session token:</strong> a random code identifying your login session, expiring automatically after 30 days of inactivity. It is not a cookie: it is stored only in your browser's local storage (localStorage) and sent to the server with each request to authenticate you.</p>
+          <p><strong>IP address:</strong> processed transiently (not permanently stored in the database) to limit excessive requests from the same address (anti-abuse protection). Your IP address may also appear in standard technical web server logs, independently of this application.</p>
+          <p><strong>Game settings:</strong> language, audio on/off, control scheme, Colorblind Mode, Enhanced FX and similar are stored only in your browser's local storage (localStorage) and are never sent to the server.</p>
+          <p><strong>Usage statistics (analytics):</strong> we use <strong>Umami Analytics</strong>, in the cloud version provided by Umami (Umami Cloud), to collect site traffic statistics: pages visited, referring site, device/browser type, approximate country, visit duration. Umami does not set cookies on your device and does not collect information that directly identifies you (name, email, etc.). To calculate unique visitors, your IP address is combined with other technical data (browser type, domain) and turned into a hash code that changes every day — your IP is never stored in plain text. In fairness, under the prevailing interpretation of GDPR, an identifier of this kind (pseudonymized) is still considered "personal data" even though it doesn't allow direct identification of you: for this reason we handle it with the same safeguards as other browsing data. Being a third-party cloud service, this data is processed on Umami's servers, not ours — see point 5 for details.</p>
+
+          <h3>3. Legal basis</h3>
+          <p>Processing of account and gameplay data is necessary to provide the service you requested (creating an account, saving scores, showing the leaderboard) — Art. 6(1)(b) GDPR. Processing of the IP address for anti-abuse protection and for usage statistics via Umami is based on legitimate interest in keeping the service secure and understanding how it is used — Art. 6(1)(f) GDPR. As no cookies or cross-site profiling/tracking techniques are used, we believe this processing can rely on legitimate interest without requiring separate prior consent; you retain the right to object at any time by writing to the address in section 1.</p>
+
+          <h3>4. Cookies</h3>
+          <p>This game <strong>does not use cookies</strong>. Authentication and preferences are handled through browser local storage (localStorage), which stays on your device and is not shared with third parties. The analytics tool (Umami) is also cookieless by design: it does not set any cookie on your device. If you install the game as an app (PWA), a Service Worker caches only the app's static files (HTML/CSS/JS/icons) on your device to speed up subsequent loads and enable partial offline use — this cache also stays local to your device and contains no personal data.</p>
+
+          <h3>5. Third-party services</h3>
+          <p>The game's fonts ("Chakra Petch", "Space Mono") are loaded from Google Fonts servers (fonts.googleapis.com, fonts.gstatic.com). Your browser therefore makes a direct request to Google's servers to download them, and Google may consequently process your IP address according to its own privacy policy.</p>
+          <p><strong>Umami Cloud</strong> (umami.is): site usage statistics are handled through Umami's cloud service, a third-party provider. Your browser sends directly to Umami the technical data described in section 2 (pages visited, device/browser, approximate country, and your IP address turned into a daily hash). As this is a service hosted by an external provider, processing may take place on servers located outside the European Economic Area (EEA); in that case the transfer relies on safeguards provided by the vendor (standard contractual clauses or equivalent mechanisms required by GDPR). For Umami's full privacy notice see <strong>umami.is/privacy</strong>.</p>
+          <p>No advertising of any kind is shown, and your data is not sold to third parties.</p>
+
+          <h3>6. Data retention</h3>
+          <p>Account and gameplay data is retained for as long as your account remains active. If you wish to have your account and associated data deleted, please write to the address in section 1: the request will be handled manually, as a self-service deletion feature is not currently available in the app.</p>
+
+          <h3>7. Your rights</h3>
+          <p>As a data subject you may at any time request: access to your data, rectification of inaccurate data, erasure ("right to be forgotten"), restriction of processing, data portability, objection to processing (Articles 15-22 GDPR). You may also lodge a complaint with the competent supervisory authority (in Italy, the Garante per la protezione dei dati personali, www.garanteprivacy.it, or your local data protection authority).</p>
+
+          <h3>8. Minors</h3>
+          <p>The game does not request or verify users' age and does not knowingly collect data from minors below the threshold set by applicable law. If you are a parent/guardian and believe a minor has provided personal data, please contact us for removal.</p>
+
+          <h3>9. Security</h3>
+          <p>Passwords are stored only in encrypted (hashed) form, communication with the server should occur over HTTPS (check that your hosting supports it), and data access is protected by session tokens with automatic expiry.</p>
+
+          <h3>10. Changes</h3>
+          <p>This notice may be updated over time; the date at the top of the document indicates the latest revision.</p>
+        </div>
+      </div>
+
+    </div>
+    <button class="btn btn-primary" id="privacy-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- ============================= MODALE CALIBRAZIONE SENSORI ============================= -->
+<div id="tilt-calibration-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="settings.tilt_calibration_title">Calibrazione Sensori</h2>
+    <div class="modal-scroll">
+      <div class="tilt-level"><div class="tilt-level-dot" id="tilt-level-dot"></div></div>
+      <p class="forgot-intro" data-i18n="settings.tilt_calibration_hint">Tieni il dispositivo nella posizione che vuoi usare come "centro" durante il gioco, poi premi il pulsante.</p>
+      <p id="tilt-orientation-warning" class="tilt-orientation-warning hidden" data-i18n="settings.tilt_calibration_rotate_hint">⚠ Sei in verticale: ruota il dispositivo in orizzontale prima di calibrare, dato che giocherai in quell'orientamento.</p>
+    </div>
+    <button class="btn btn-primary" id="tilt-calibrate-btn" data-i18n="settings.tilt_calibration_set_zero">Imposta punto zero</button>
+    <div id="tilt-calibration-msg" class="account-success"></div>
+    <button class="btn" id="tilt-calibration-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- v1.36.0 — registrazione rapida in un modale invece di una schermata
+     a sé stante: aperto dal pulsante "Salva i tuoi progressi con un
+     account" a fine partita. Resta sopra il recap della run (che non
+     scompare più dietro una navigazione a schermo intero) — stesso
+     account già in uso (nickname/gemme/progressi invariati), si
+     aggiungono solo email e password, restando loggati per continuare
+     subito a giocare. -->
+<div id="quick-register-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="quickregister.title">Salva i tuoi progressi</h2>
+    <div class="modal-scroll">
+      <p class="forgot-intro" data-i18n="quickregister.intro">Aggiungi email e password al tuo profilo attuale: nickname, gemme e progressi restano quelli di adesso, e resti collegato per continuare a giocare.</p>
+      <input class="input" id="qr-nickname" type="text" maxlength="32" data-i18n-placeholder="account.nickname_placeholder" placeholder="Nickname">
+      <input class="input" id="qr-email" type="email" data-i18n-placeholder="account.email_placeholder" placeholder="Email">
+      <input class="input" id="qr-password" type="password" data-i18n-placeholder="account.password_placeholder" placeholder="Password">
+      <div id="qr-error" class="account-error"></div>
+      <button class="link-btn hidden" id="qr-suggestion-btn"></button>
+      <div id="qr-success" class="account-success"></div>
+    </div>
+    <button class="btn btn-primary" id="qr-submit" data-i18n="quickregister.submit">REGISTRATI</button>
+    <button class="btn" id="qr-close" data-i18n="common.close">CHIUDI</button>
+  </div>
+</div>
+
+<!-- v1.37.0 — conferma cancellazione account: richiede la password
+     corrente (non solo un popup "sei sicuro?"), trattandosi di
+     un'operazione irreversibile che elimina definitivamente nickname,
+     gemme, run, missioni e traguardi. -->
+<div id="delete-account-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="account.delete_account_title">Elimina Account</h2>
+    <div class="modal-scroll">
+      <p class="forgot-intro" data-i18n="account.delete_account_warning">Questa operazione è DEFINITIVA: perderai per sempre nickname, gemme, progressi, missioni e traguardi. Inserisci la password per confermare.</p>
+      <input class="input" id="delete-account-password" type="password" data-i18n-placeholder="account.password_placeholder" placeholder="Password">
+      <div id="delete-account-error" class="account-error"></div>
+    </div>
+    <button class="btn btn-danger" id="delete-account-confirm" data-i18n="account.delete_account_confirm">ELIMINA DEFINITIVAMENTE</button>
+    <button class="btn" id="delete-account-cancel" data-i18n="common.close">ANNULLA</button>
+  </div>
+</div>
+
+<!-- v1.37.0 — mostrato dopo "Gioca" (prima della scelta difficoltà) solo
+     a chi sta giocando da ospite: spiega perché conviene registrarsi
+     (nickname esclusivo, progressi al sicuro) invece di lasciare che lo
+     scopra solo quando è già in conflitto con qualcuno. Disattivabile
+     in modo permanente con la casella in fondo. -->
+<div id="guest-protect-nickname-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2 class="screen-title" data-i18n="guestprompt.title">Proteggi il tuo nickname</h2>
+    <div class="modal-scroll">
+      <p class="forgot-intro" data-i18n="guestprompt.body">Registrandoti, il tuo nickname diventa esclusivo: nessun altro potrà usarlo, e punteggi, gemme, missioni e progressi restano legati solo a te, al sicuro su qualunque dispositivo.</p>
+    </div>
+    <button class="btn btn-primary" id="guest-prompt-register-btn" data-i18n="guestprompt.register_cta">REGISTRATI ORA</button>
+    <button class="btn" id="guest-prompt-continue-btn" data-i18n="guestprompt.continue">CONTINUA COME OSPITE</button>
+    <label class="guest-prompt-checkbox-row">
+      <input type="checkbox" id="guest-prompt-dont-show">
+      <span data-i18n="guestprompt.dont_show_again">Non mostrare più</span>
+    </label>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

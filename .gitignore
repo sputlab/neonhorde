@@ -1,0 +1,44 @@
+# --- Secrets / environment (NEVER commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Database dumps & user data (may contain personal data / hashes) ---
+*.sql.gz
+*.dump
+*_export_*.sql
+database/dumps/
+database/backups/
+
+# --- Uploads, logs, runtime ---
+*.log
+logs/
+tmp/
+cache/
+
+# --- Dependencies & build output ---
+node_modules/
+vendor/
+dist/
+build/
+
+# --- Archives / old versions ---
+*.zip
+*.tar
+*.tar.gz
+*.rar
+old versions/
+archives/
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# --- Large unoptimized design sources ---
+*-uncompressed.png

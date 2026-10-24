@@ -1,0 +1,24 @@
+# Blocca l'accesso diretto a file di configurazione/dati sensibili
+<FilesMatch "^(\.env.*|.*\.sql)$">
+    Require all denied
+</FilesMatch>
+
+# Disabilita il directory listing
+Options -Indexes
+
+# PWA: alcuni Apache non conoscono di default il MIME type di
+# .webmanifest (lo servirebbero come octet-stream, che alcuni browser
+# rifiutano per il link rel="manifest").
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# Fallback: su alcuni setup Apache+PHP (FPM/CGI) l'header "Authorization"
+# non arriva a PHP a meno di questa regola. Il backend usa comunque come
+# trasporto primario l'header custom "X-Auth-Token" (che non viene mai
+# filtrato), quindi questa riga è solo una difesa in profondità.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} ^(.+)$
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+</IfModule>
