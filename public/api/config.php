@@ -33,7 +33,16 @@ function load_env(string $path): void
 load_env(__DIR__ . '/../.env');
 
 define('APP_ENV', getenv('APP_ENV') ?: 'production');
-define('APP_SECRET', getenv('APP_SECRET') ?: 'insecure-default-change-me');
+$appSecret = getenv('APP_SECRET') ?: '';
+if (strlen($appSecret) < 32 || stripos($appSecret, 'change_me') !== false) {
+    // Fail closed: mai avviare con un segreto assente, troppo corto o di esempio
+    error_log('NEON HORDE: APP_SECRET mancante o non valido (min. 32 caratteri, non il valore di esempio). Vedi .env.example');
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false, 'error' => 'server_misconfigured']);
+    exit;
+}
+define('APP_SECRET', $appSecret);
 define('SESSION_TTL', (int) (getenv('SESSION_TTL') ?: 2592000));
 
 if (APP_ENV === 'production') {

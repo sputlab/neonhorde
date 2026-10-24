@@ -2,8 +2,8 @@
 -- HORDE SURVIVOR — Schema MySQL 8
 -- =====================================================================
 -- Import in un database GIA' ESISTENTE (hosting condiviso: qui
--- "sputlabc61682", ma vale per qualsiasi nome):
---   mysql -u <user> -p sputlabc61682 < schema.sql
+-- "your_database_name", ma vale per qualsiasi nome):
+--   mysql -u <user> -p your_database_name < schema.sql
 -- oppure da phpMyAdmin: seleziona il database dalla sidebar -> scheda
 -- "Importa" -> carica questo file.
 --

@@ -23,3 +23,8 @@ CHANGELOG.md   Release history
 3. Serve `public/` with Apache + PHP 8, or locally: `php -S localhost:8000 -t public`.
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for architecture, anti-cheat, API and deployment details.
+
+## License
+
+Copyright (C) 2026 Sputlab. Licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-or-later).
+If you run a modified version as a network service, you must offer its source code to your users.

@@ -74,10 +74,10 @@ liberamente). Le tabelle vengono create nel database che selezioni tu.
 mysql -u <utente_fornito_dal_hosting> -p <nome_del_tuo_database> < sql/schema.sql
 ```
 
-Esempio concreto con un database `sputlabc61682` già esistente:
+Esempio concreto con un database `your_database_name` già esistente:
 
 ```bash
-mysql -u sputlabc61682 -p sputlabc61682 < sql/schema.sql
+mysql -u your_database_name -p your_database_name < sql/schema.sql
 ```
 
 In alternativa, da phpMyAdmin: seleziona il database dalla sidebar →
@@ -253,7 +253,7 @@ i permessi:
 
 ```sql
 CREATE USER 'horde_user'@'localhost' IDENTIFIED BY 'una_password_forte';
-GRANT SELECT, INSERT, UPDATE, DELETE ON sputlabc61682.* TO 'horde_user'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON your_database_name.* TO 'horde_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
